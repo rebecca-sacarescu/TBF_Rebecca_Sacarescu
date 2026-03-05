@@ -14,7 +14,7 @@ public class LoginUseCaseImpl implements LoginUseCase {
     private final PasswordEncoderGateway passwordEncoder;
     private final TokenGateway tokenGateway;
 
-    // --- MANUAL CONSTRUCTOR ADDED HERE ---
+
     public LoginUseCaseImpl(UserGateway userGateway,
                             PasswordEncoderGateway passwordEncoder,
                             TokenGateway tokenGateway) {

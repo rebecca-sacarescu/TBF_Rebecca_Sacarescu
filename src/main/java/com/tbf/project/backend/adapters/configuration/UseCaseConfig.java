@@ -9,7 +9,11 @@ import com.tbf.project.backend.entities.gateway.TokenGateway;
 import com.tbf.project.backend.entities.gateway.UserGateway;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-
+import com.tbf.project.backend.application.usecases.CreateProfileUseCase;
+import com.tbf.project.backend.application.usecases.GetProfileUseCase;
+import com.tbf.project.backend.application.usecases.impl.CreateProfileUseCaseImpl;
+import com.tbf.project.backend.application.usecases.impl.GetProfileUseCaseImpl;
+import com.tbf.project.backend.entities.gateway.ProfileGateway;
 @Configuration
 public class UseCaseConfig {
 
@@ -37,5 +41,15 @@ public class UseCaseConfig {
                 passwordEncoderGateway,
                 tokenGateway
         );
+    }
+
+    @Bean
+    public CreateProfileUseCase createProfileUseCase(ProfileGateway profileGateway) {
+        return new CreateProfileUseCaseImpl(profileGateway);
+    }
+
+    @Bean
+    public GetProfileUseCase getProfileUseCase(ProfileGateway profileGateway) {
+        return new GetProfileUseCaseImpl(profileGateway);
     }
 }

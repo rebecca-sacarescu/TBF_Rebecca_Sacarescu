@@ -18,12 +18,17 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class AuthController {
 
+    //interfaces (use cases from the application layer)
+    //spring injects the implementations created in UseCaseConfig
+
     private final RegisterUseCase registerUseCase;
     private final LoginUseCase loginUseCase;
 
 
+    //converting the json to a Dto
     @PostMapping("/signup")
     public ResponseEntity<AuthResponseDto> signup(@Valid @RequestBody RegisterInputDto req) {
+        //call use case that performs business rules
         AuthResponseDto response = registerUseCase.execute(req);
         return ResponseEntity.ok(response);
     }

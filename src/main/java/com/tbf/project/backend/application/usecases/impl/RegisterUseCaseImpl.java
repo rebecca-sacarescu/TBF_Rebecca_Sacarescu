@@ -21,7 +21,6 @@ public class RegisterUseCaseImpl implements RegisterUseCase {
     private final PasswordEncoderGateway passwordEncoder;
     private final TokenGateway tokenGateway;
 
-    // --- MANUAL CONSTRUCTOR ADDED HERE ---
     public RegisterUseCaseImpl(UserGateway userGateway,
                                PasswordEncoderGateway passwordEncoder,
                                TokenGateway tokenGateway) {
@@ -59,12 +58,10 @@ public class RegisterUseCaseImpl implements RegisterUseCase {
     }
 
     private void validateInput(RegisterInputDto input) {
-        // Basic sanitization
         if (input.username().contains("<") || input.username().contains(">")) {
             throw new IllegalArgumentException("Invalid characters in username.");
         }
 
-        // No repeated spaces
         if (!input.username().equals(input.username().trim())) {
             throw new IllegalArgumentException("Username cannot start or end with spaces.");
         }
@@ -73,7 +70,6 @@ public class RegisterUseCaseImpl implements RegisterUseCase {
             throw new IllegalArgumentException("Username cannot contain repeated spaces.");
         }
 
-        // Ban certain usernames
         List<String> forbidden = List.of("admin", "root", "system");
         if (forbidden.contains(input.username().toLowerCase())) {
             throw new IllegalArgumentException("Username not allowed.");
