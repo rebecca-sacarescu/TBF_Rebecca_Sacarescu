@@ -49,6 +49,14 @@ public class ProfileGatewayImpl implements ProfileGateway {
         return repository.existsByUserId(userId);
     }
 
+    @Override
+    public List<UserProfile> findAllExceptUserId(Long userId) {
+        return repository.findAllByUserIdNot(userId).stream()
+                .map(this::toDomain)
+                .collect(Collectors.toList());
+    }
+
+
     private UserProfileJpaEntity toJpaEntity(UserProfile domain) {
         UserProfileJpaEntity entity = UserProfileJpaEntity.builder()
                 .userId(domain.getUserId())

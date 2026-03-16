@@ -1,18 +1,12 @@
 package com.tbf.project.backend.adapters.configuration;
 
-import com.tbf.project.backend.application.usecases.LoginUseCase;
-import com.tbf.project.backend.application.usecases.RegisterUseCase;
-import com.tbf.project.backend.application.usecases.impl.LoginUseCaseImpl;
-import com.tbf.project.backend.application.usecases.impl.RegisterUseCaseImpl;
+import com.tbf.project.backend.application.usecases.*;
+import com.tbf.project.backend.application.usecases.impl.*;
 import com.tbf.project.backend.entities.gateway.PasswordEncoderGateway;
 import com.tbf.project.backend.entities.gateway.TokenGateway;
 import com.tbf.project.backend.entities.gateway.UserGateway;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import com.tbf.project.backend.application.usecases.CreateProfileUseCase;
-import com.tbf.project.backend.application.usecases.GetProfileUseCase;
-import com.tbf.project.backend.application.usecases.impl.CreateProfileUseCaseImpl;
-import com.tbf.project.backend.application.usecases.impl.GetProfileUseCaseImpl;
 import com.tbf.project.backend.entities.gateway.ProfileGateway;
 @Configuration
 public class UseCaseConfig {
@@ -51,5 +45,10 @@ public class UseCaseConfig {
     @Bean
     public GetProfileUseCase getProfileUseCase(ProfileGateway profileGateway) {
         return new GetProfileUseCaseImpl(profileGateway);
+    }
+
+    @Bean
+    public GetFeedUseCase getFeedUseCase(ProfileGateway profileGateway) {
+        return new GetFeedUseCaseImpl(profileGateway);
     }
 }

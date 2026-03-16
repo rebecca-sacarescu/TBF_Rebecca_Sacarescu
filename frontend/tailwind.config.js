@@ -1,0 +1,18 @@
+/** @type {import('tailwindcss').Config} */
+export default {
+  content: [
+    "./index.html",
+    "./src/**/*.{js,ts,jsx,tsx}",
+  ],
+  theme: {
+    extend: {
+      fontFamily: {
+        display: ["Plus Jakarta Sans", "sans-serif"],
+      },
+      colors: {
+        primary: "#0062e3",
+      },
+    },
+  },
+  plugins: [],
+};
