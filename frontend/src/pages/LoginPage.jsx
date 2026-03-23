@@ -7,7 +7,6 @@ import {
     ArrowIcon,
     SpinnerIcon,
     ExploreIcon,
-    CheckCircleIcon,
 } from "../components/Icons";
 import { validators } from "../utils/validators";
 import authApi, { parseBackendError } from "../services/authApi";
@@ -58,7 +57,6 @@ export default function LoginPage({ onNavigate }) {
     const [errors, setErrors] = useState({});
     const [apiError, setApiError] = useState("");
     const [loading, setLoading] = useState(false);
-    const [success, setSuccess] = useState(false);
 
     const validate = () => {
         const e = {};
@@ -78,40 +76,14 @@ export default function LoginPage({ onNavigate }) {
             const res = await authApi.login({ email, password });
             // ASSUMPTION: response has { token: "..." }
             TokenService.setToken(res.token);
-            setSuccess(true);
-            // In production with react-router: navigate("/dashboard")
+            // Navigate to profile page
+            onNavigate("check-profile");
         } catch (err) {
             setApiError(parseBackendError(err));
         } finally {
             setLoading(false);
         }
     };
-
-    /* ── Success state ── */
-    if (success) {
-        return (
-            <BoardingPassLayout stub={<LoginStub />}>
-                <div className="flex-1 flex flex-col items-center justify-center text-center py-8">
-                    <div className="w-14 h-14 bg-emerald-100 rounded-full flex items-center justify-center mb-4">
-                        <CheckCircleIcon />
-                    </div>
-                    <h2 className="text-2xl font-black text-slate-900 mb-2">
-                        Check-in Complete!
-                    </h2>
-                    <p className="text-slate-500 text-sm mb-4">
-                        Welcome back, traveler. Redirecting to your dashboard...
-                    </p>
-                    <p className="text-[11px] text-slate-400">
-                        (In production, this redirects to{" "}
-                        <code className="bg-slate-100 px-1.5 py-0.5 rounded text-[11px]">
-                            /dashboard
-                        </code>
-                        )
-                    </p>
-                </div>
-            </BoardingPassLayout>
-        );
-    }
 
     return (
         <BoardingPassLayout
