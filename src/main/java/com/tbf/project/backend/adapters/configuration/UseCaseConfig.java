@@ -3,11 +3,12 @@ package com.tbf.project.backend.adapters.configuration;
 import com.tbf.project.backend.application.usecases.*;
 import com.tbf.project.backend.application.usecases.impl.*;
 import com.tbf.project.backend.entities.gateway.PasswordEncoderGateway;
+import com.tbf.project.backend.entities.gateway.ProfileGateway;
 import com.tbf.project.backend.entities.gateway.TokenGateway;
 import com.tbf.project.backend.entities.gateway.UserGateway;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import com.tbf.project.backend.entities.gateway.ProfileGateway;
+
 @Configuration
 public class UseCaseConfig {
 
@@ -45,6 +46,11 @@ public class UseCaseConfig {
     @Bean
     public GetProfileUseCase getProfileUseCase(ProfileGateway profileGateway) {
         return new GetProfileUseCaseImpl(profileGateway);
+    }
+
+    @Bean
+    public UpdateProfileUseCase updateProfileUseCase(ProfileGateway profileGateway) {
+        return new UpdateProfileUseCaseImpl(profileGateway);
     }
 
     @Bean

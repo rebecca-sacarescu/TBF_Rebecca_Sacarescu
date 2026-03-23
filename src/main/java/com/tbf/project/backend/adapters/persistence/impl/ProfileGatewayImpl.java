@@ -2,15 +2,18 @@ package com.tbf.project.backend.adapters.persistence.impl;
 
 import com.tbf.project.backend.adapters.persistence.entities.ProfileAttributeJpaEntity;
 import com.tbf.project.backend.adapters.persistence.entities.UserProfileJpaEntity;
+import com.tbf.project.backend.adapters.persistence.repositories.ProfileAttributeJpaRepository;
 import com.tbf.project.backend.adapters.persistence.repositories.UserProfileJpaRepository;
 import com.tbf.project.backend.entities.gateway.ProfileGateway;
 import com.tbf.project.backend.entities.model.UserProfile;
 import com.tbf.project.backend.entities.model.enums.AttributeCategory;
+import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -20,23 +23,54 @@ import java.util.stream.Collectors;
 public class ProfileGatewayImpl implements ProfileGateway {
 
     private final UserProfileJpaRepository repository;
+    private final ProfileAttributeJpaRepository profileAttributeRepository;
+    private final EntityManager entityManager;
 
     @Override
     @Transactional
     public UserProfile save(UserProfile domain) {
-        UserProfileJpaEntity entity = toJpaEntity(domain);
+        Optional<UserProfileJpaEntity> existingOptional = repository.findByUserId(domain.getUserId());
 
-        if (repository.existsByUserId(domain.getUserId())) {
-            UserProfileJpaEntity existing = repository.findByUserId(domain.getUserId()).get();
-            entity.setId(existing.getId());
-            entity.setCreatedAt(existing.getCreatedAt());
-        } else {
-            entity.setCreatedAt(LocalDateTime.now());
+        if (existingOptional.isPresent()) {
+            Long profileId = existingOptional.get().getId();
+
+            updateExistingProfile(profileId, domain);
+
+            UserProfileJpaEntity refreshed = repository.findById(profileId)
+                    .orElseThrow(() -> new IllegalStateException("Profile not found after update for ID: " + profileId));
+
+            return toDomain(refreshed);
         }
+
+        UserProfileJpaEntity entity = toJpaEntity(domain);
+        entity.setCreatedAt(LocalDateTime.now());
         entity.setUpdatedAt(LocalDateTime.now());
 
         UserProfileJpaEntity saved = repository.save(entity);
         return toDomain(saved);
+    }
+
+    private void updateExistingProfile(Long profileId, UserProfile domain) {
+        profileAttributeRepository.deleteAllByProfileId(profileId);
+        entityManager.flush();
+        entityManager.clear();
+
+        UserProfileJpaEntity entity = repository.findById(profileId)
+                .orElseThrow(() -> new IllegalStateException("Profile not found for ID: " + profileId));
+
+        updateScalarFields(entity, domain);
+        entity.setUpdatedAt(LocalDateTime.now());
+
+        entity.getAttributes().clear();
+
+        addAttribute(entity, AttributeCategory.ACTIVITY, domain.getActivities());
+        addAttribute(entity, AttributeCategory.DESTINATION_TYPE, domain.getDestinationTypes());
+        addAttribute(entity, AttributeCategory.EXPERIENCE_TYPE, domain.getExperienceTypes());
+        addAttribute(entity, AttributeCategory.LANGUAGE, domain.getLanguages());
+        addAttribute(entity, AttributeCategory.LOOKING_FOR_WHO, domain.getLookingForWho());
+        addAttribute(entity, AttributeCategory.LOOKING_FOR_WHAT, domain.getLookingForWhat());
+
+        entityManager.flush();
     }
 
     @Override
@@ -56,6 +90,21 @@ public class ProfileGatewayImpl implements ProfileGateway {
                 .collect(Collectors.toList());
     }
 
+    private void updateScalarFields(UserProfileJpaEntity entity, UserProfile domain) {
+        entity.setUserId(domain.getUserId());
+        entity.setFullName(domain.getFullName());
+        entity.setBirthDate(domain.getBirthDate());
+        entity.setGender(domain.getGender());
+        entity.setOriginCountry(domain.getOriginCountry());
+        entity.setOriginCity(domain.getOriginCity());
+        entity.setCurrentLocation(domain.getCurrentLocation());
+        entity.setBio(domain.getBio());
+        entity.setProfilePictureUrl(domain.getProfilePictureUrl());
+        entity.setVerificationStatus(domain.getVerificationStatus());
+        entity.setSocialBattery(domain.getSocialBattery());
+        entity.setPlanningStyle(domain.getPlanningStyle());
+        entity.setBudget(domain.getBudget());
+    }
 
     private UserProfileJpaEntity toJpaEntity(UserProfile domain) {
         UserProfileJpaEntity entity = UserProfileJpaEntity.builder()
@@ -72,7 +121,7 @@ public class ProfileGatewayImpl implements ProfileGateway {
                 .socialBattery(domain.getSocialBattery())
                 .planningStyle(domain.getPlanningStyle())
                 .budget(domain.getBudget())
-                .attributes(new java.util.ArrayList<>())
+                .attributes(new ArrayList<>())
                 .build();
 
         addAttribute(entity, AttributeCategory.ACTIVITY, domain.getActivities());
@@ -86,7 +135,10 @@ public class ProfileGatewayImpl implements ProfileGateway {
     }
 
     private void addAttribute(UserProfileJpaEntity entity, AttributeCategory category, List<String> values) {
-        if (values == null) return;
+        if (values == null) {
+            return;
+        }
+
         for (String val : values) {
             entity.getAttributes().add(ProfileAttributeJpaEntity.builder()
                     .profile(entity)
@@ -112,7 +164,6 @@ public class ProfileGatewayImpl implements ProfileGateway {
                 .socialBattery(entity.getSocialBattery())
                 .planningStyle(entity.getPlanningStyle())
                 .budget(entity.getBudget())
-                // category filtering
                 .activities(getValues(entity, AttributeCategory.ACTIVITY))
                 .destinationTypes(getValues(entity, AttributeCategory.DESTINATION_TYPE))
                 .experienceTypes(getValues(entity, AttributeCategory.EXPERIENCE_TYPE))

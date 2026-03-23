@@ -1,4 +1,5 @@
 package com.tbf.project.backend.application.dto;
+
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Past;
@@ -17,16 +18,24 @@ public record CreateProfileInputDto(
         LocalDate birthDate,
 
         @NotBlank
+        @Size(max = 50)
         String gender,
 
         @NotBlank
+        @Size(max = 100)
         String originCountry,
 
         @NotBlank
+        @Size(max = 100)
         String originCity,
 
+        @Size(max = 150)
         String currentLocation,
 
+        @Size(max = 2048)
+        String profilePictureUrl,
+
+        @Size(max = 1000)
         String bio,
 
         @NotBlank

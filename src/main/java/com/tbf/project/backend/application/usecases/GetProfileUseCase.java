@@ -1,5 +1,7 @@
 package com.tbf.project.backend.application.usecases;
-import com.tbf.project.backend.application.dto.ProfileResponseDto;
+
+import com.tbf.project.backend.application.dto.MyProfileResponseDto;
+
 public interface GetProfileUseCase {
-    ProfileResponseDto execute(Long userId);
+    MyProfileResponseDto execute(Long userId);
 }
