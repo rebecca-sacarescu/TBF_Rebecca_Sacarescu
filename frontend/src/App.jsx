@@ -103,7 +103,7 @@ export default function App() {
     const renderDashboardContent = () => {
         switch (page) {
             case "feed":
-                return <FeedPage />;
+                return <FeedPage onNavigate={handleNavigate} />;
             case "matches":
                 return <MatchesPage />;
             case "profile":

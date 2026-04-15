@@ -1,0 +1,56 @@
+1. Script SQL pentru baza de date
+
+Rulează asta în PostgreSQL:
+
+-- 1) Enum pentru tipul de interacțiune
+CREATE TYPE interaction_type AS ENUM ('NO', 'YES', 'SUPER_LIKE');
+
+-- 2) Tabel pentru interacțiunile din feed
+CREATE TABLE IF NOT EXISTS profile_interactions (
+    id BIGSERIAL PRIMARY KEY,
+
+    actor_user_id BIGINT NOT NULL,
+    target_user_id BIGINT NOT NULL,
+
+    interaction_type interaction_type NOT NULL,
+
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT fk_profile_interactions_actor_user
+        FOREIGN KEY (actor_user_id)
+        REFERENCES users(id)
+        ON DELETE CASCADE,
+
+    CONSTRAINT fk_profile_interactions_target_user
+        FOREIGN KEY (target_user_id)
+        REFERENCES users(id)
+        ON DELETE CASCADE,
+
+    CONSTRAINT uk_profile_interactions_actor_target
+        UNIQUE (actor_user_id, target_user_id),
+
+    CONSTRAINT chk_profile_interactions_not_self
+        CHECK (actor_user_id <> target_user_id)
+);
+
+-- 3) Indexuri utile
+CREATE INDEX IF NOT EXISTS idx_profile_interactions_actor_user_id
+    ON profile_interactions(actor_user_id);
+
+CREATE INDEX IF NOT EXISTS idx_profile_interactions_target_user_id
+    ON profile_interactions(target_user_id);
+
+CREATE INDEX IF NOT EXISTS idx_profile_interactions_actor_type
+    ON profile_interactions(actor_user_id, interaction_type);
+Dacă ai eroare că enum-ul există deja
+
+Folosește varianta asta înainte:
+
+DO $$
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'interaction_type') THEN
+        CREATE TYPE interaction_type AS ENUM ('NO', 'YES', 'SUPER_LIKE');
+    END IF;
+END
+$$;

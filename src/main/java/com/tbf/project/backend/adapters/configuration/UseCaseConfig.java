@@ -1,13 +1,16 @@
 package com.tbf.project.backend.adapters.configuration;
 
+import com.tbf.project.backend.application.service.ProfileCompatibilityCalculator;
 import com.tbf.project.backend.application.usecases.*;
 import com.tbf.project.backend.application.usecases.impl.*;
+import com.tbf.project.backend.entities.gateway.FeedCacheGateway;
 import com.tbf.project.backend.entities.gateway.PasswordEncoderGateway;
 import com.tbf.project.backend.entities.gateway.ProfileGateway;
 import com.tbf.project.backend.entities.gateway.TokenGateway;
 import com.tbf.project.backend.entities.gateway.UserGateway;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import com.tbf.project.backend.entities.gateway.InteractionGateway;
 
 @Configuration
 public class UseCaseConfig {
@@ -39,8 +42,11 @@ public class UseCaseConfig {
     }
 
     @Bean
-    public CreateProfileUseCase createProfileUseCase(ProfileGateway profileGateway) {
-        return new CreateProfileUseCaseImpl(profileGateway);
+    public CreateProfileUseCase createProfileUseCase(
+            ProfileGateway profileGateway,
+            FeedCacheGateway feedCacheGateway
+    ) {
+        return new CreateProfileUseCaseImpl(profileGateway, feedCacheGateway);
     }
 
     @Bean
@@ -49,12 +55,30 @@ public class UseCaseConfig {
     }
 
     @Bean
-    public UpdateProfileUseCase updateProfileUseCase(ProfileGateway profileGateway) {
-        return new UpdateProfileUseCaseImpl(profileGateway);
+    public UpdateProfileUseCase updateProfileUseCase(
+            ProfileGateway profileGateway,
+            FeedCacheGateway feedCacheGateway
+    ) {
+        return new UpdateProfileUseCaseImpl(profileGateway, feedCacheGateway);
     }
 
     @Bean
-    public GetFeedUseCase getFeedUseCase(ProfileGateway profileGateway) {
-        return new GetFeedUseCaseImpl(profileGateway);
+    public ProfileCompatibilityCalculator profileCompatibilityCalculator() {
+        return new ProfileCompatibilityCalculator();
+    }
+
+    @Bean
+    public GetFeedUseCase getFeedUseCase(
+            ProfileGateway profileGateway,
+            FeedCacheGateway feedCacheGateway,
+            ProfileCompatibilityCalculator profileCompatibilityCalculator,
+            InteractionGateway interactionGateway
+    ) {
+        return new GetFeedUseCaseImpl(
+                profileGateway,
+                feedCacheGateway,
+                profileCompatibilityCalculator,
+                interactionGateway
+        );
     }
 }

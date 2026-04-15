@@ -90,6 +90,17 @@ public class ProfileGatewayImpl implements ProfileGateway {
                 .collect(Collectors.toList());
     }
 
+    @Override
+    public List<UserProfile> findAllByUserIds(List<Long> userIds) {
+        if (userIds == null || userIds.isEmpty()) {
+            return List.of();
+        }
+
+        return repository.findAllByUserIdIn(userIds).stream()
+                .map(this::toDomain)
+                .collect(Collectors.toList());
+    }
+
     private void updateScalarFields(UserProfileJpaEntity entity, UserProfile domain) {
         entity.setUserId(domain.getUserId());
         entity.setFullName(domain.getFullName());

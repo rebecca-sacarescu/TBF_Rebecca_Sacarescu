@@ -12,4 +12,5 @@ public interface UserProfileJpaRepository extends JpaRepository<UserProfileJpaEn
     Optional<UserProfileJpaEntity> findByUserId(Long userId);
     boolean existsByUserId(Long userId);
     List<UserProfileJpaEntity> findAllByUserIdNot(Long userId);
+    List<UserProfileJpaEntity> findAllByUserIdIn(List<Long> userIds);
 }
