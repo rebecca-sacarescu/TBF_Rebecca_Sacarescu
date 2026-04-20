@@ -105,7 +105,7 @@ export default function App() {
             case "feed":
                 return <FeedPage onNavigate={handleNavigate} />;
             case "matches":
-                return <MatchesPage />;
+                return <MatchesPage onNavigate={handleNavigate} />;
             case "profile":
             default:
                 return (

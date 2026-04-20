@@ -6,13 +6,12 @@ import com.tbf.project.backend.application.service.ProfileCompatibilityCalculato
 import com.tbf.project.backend.application.usecases.GetFeedUseCase;
 import com.tbf.project.backend.entities.gateway.FeedCacheGateway;
 import com.tbf.project.backend.entities.gateway.InteractionGateway;
+import com.tbf.project.backend.entities.gateway.MatchGateway;
 import com.tbf.project.backend.entities.gateway.ProfileGateway;
+import com.tbf.project.backend.entities.model.Match;
 import com.tbf.project.backend.entities.model.UserProfile;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -22,17 +21,20 @@ public class GetFeedUseCaseImpl implements GetFeedUseCase {
     private final FeedCacheGateway feedCacheGateway;
     private final ProfileCompatibilityCalculator compatibilityCalculator;
     private final InteractionGateway interactionGateway;
+    private final MatchGateway matchGateway;
 
     public GetFeedUseCaseImpl(
             ProfileGateway profileGateway,
             FeedCacheGateway feedCacheGateway,
             ProfileCompatibilityCalculator compatibilityCalculator,
-            InteractionGateway interactionGateway
+            InteractionGateway interactionGateway,
+            MatchGateway matchGateway
     ) {
         this.profileGateway = profileGateway;
         this.feedCacheGateway = feedCacheGateway;
         this.compatibilityCalculator = compatibilityCalculator;
         this.interactionGateway = interactionGateway;
+        this.matchGateway = matchGateway;
     }
 
     @Override
@@ -47,9 +49,16 @@ public class GetFeedUseCaseImpl implements GetFeedUseCase {
         }
 
         List<Long> alreadyInteractedUserIds = interactionGateway.findTargetUserIdsByActorUserId(currentUserId);
+        List<Long> matchedUserIds = matchGateway.findActiveByUserId(currentUserId).stream()
+                .map(match -> match.getOtherUserId(currentUserId))
+                .toList();
+
+        Set<Long> excludedUserIds = new HashSet<>();
+        excludedUserIds.addAll(alreadyInteractedUserIds);
+        excludedUserIds.addAll(matchedUserIds);
 
         List<UserProfile> candidates = profileGateway.findAllExceptUserId(currentUserId).stream()
-                .filter(candidate -> !alreadyInteractedUserIds.contains(candidate.getUserId()))
+                .filter(candidate -> !excludedUserIds.contains(candidate.getUserId()))
                 .toList();
 
         List<ScoredProfile> scoredProfiles = candidates.stream()

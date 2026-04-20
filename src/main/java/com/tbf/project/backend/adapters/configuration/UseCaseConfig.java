@@ -3,14 +3,9 @@ package com.tbf.project.backend.adapters.configuration;
 import com.tbf.project.backend.application.service.ProfileCompatibilityCalculator;
 import com.tbf.project.backend.application.usecases.*;
 import com.tbf.project.backend.application.usecases.impl.*;
-import com.tbf.project.backend.entities.gateway.FeedCacheGateway;
-import com.tbf.project.backend.entities.gateway.PasswordEncoderGateway;
-import com.tbf.project.backend.entities.gateway.ProfileGateway;
-import com.tbf.project.backend.entities.gateway.TokenGateway;
-import com.tbf.project.backend.entities.gateway.UserGateway;
+import com.tbf.project.backend.entities.gateway.*;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import com.tbf.project.backend.entities.gateway.InteractionGateway;
 
 @Configuration
 public class UseCaseConfig {
@@ -19,8 +14,8 @@ public class UseCaseConfig {
     public RegisterUseCase registerUseCase(
             UserGateway userGateway,
             PasswordEncoderGateway passwordEncoderGateway,
-            TokenGateway tokenGateway) {
-
+            TokenGateway tokenGateway
+    ) {
         return new RegisterUseCaseImpl(
                 userGateway,
                 passwordEncoderGateway,
@@ -32,8 +27,8 @@ public class UseCaseConfig {
     public LoginUseCase loginUseCase(
             UserGateway userGateway,
             PasswordEncoderGateway passwordEncoderGateway,
-            TokenGateway tokenGateway) {
-
+            TokenGateway tokenGateway
+    ) {
         return new LoginUseCaseImpl(
                 userGateway,
                 passwordEncoderGateway,
@@ -72,13 +67,56 @@ public class UseCaseConfig {
             ProfileGateway profileGateway,
             FeedCacheGateway feedCacheGateway,
             ProfileCompatibilityCalculator profileCompatibilityCalculator,
-            InteractionGateway interactionGateway
+            InteractionGateway interactionGateway,
+            MatchGateway matchGateway
     ) {
         return new GetFeedUseCaseImpl(
                 profileGateway,
                 feedCacheGateway,
                 profileCompatibilityCalculator,
-                interactionGateway
+                interactionGateway,
+                matchGateway
+        );
+    }
+
+    @Bean
+    public RecordFeedInteractionUseCase recordFeedInteractionUseCase(
+            InteractionGateway interactionGateway,
+            ProfileGateway profileGateway,
+            FeedCacheGateway feedCacheGateway,
+            MatchGateway matchGateway
+    ) {
+        return new RecordFeedInteractionUseCaseImpl(
+                interactionGateway,
+                profileGateway,
+                feedCacheGateway,
+                matchGateway
+        );
+    }
+
+    @Bean
+    public GetMyMatchesUseCase getMyMatchesUseCase(
+            MatchGateway matchGateway,
+            ProfileGateway profileGateway,
+            InteractionGateway interactionGateway,
+            ProfileCompatibilityCalculator profileCompatibilityCalculator
+    ) {
+        return new GetMyMatchesUseCaseImpl(
+                matchGateway,
+                profileGateway,
+                interactionGateway,
+                profileCompatibilityCalculator
+        );
+    }
+
+    @Bean
+    public DeleteMatchUseCase deleteMatchUseCase(
+            MatchGateway matchGateway,
+            FeedCacheGateway feedCacheGateway
+    ) {
+        return new DeleteMatchUseCaseImpl(
+                matchGateway,
+                feedCacheGateway
         );
     }
 }
