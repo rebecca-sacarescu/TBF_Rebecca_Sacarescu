@@ -2,17 +2,19 @@ import { useState, useCallback, useEffect } from "react";
 import TokenService from "./services/tokenService";
 import profileApi from "./services/profileApi";
 
-// Auth pages (boarding pass layout)
+// Auth pages
 import LoginPage from "./pages/LoginPage";
 import SignupPage from "./pages/SignupPage";
 
 // Onboarding
 import CreateProfilePage from "./pages/CreateProfilePage";
 
-// Dashboard pages (new layout)
+// Dashboard pages
 import MyProfilePage from "./pages/MyProfilePage";
 import FeedPage from "./pages/FeedPage";
 import MatchesPage from "./pages/MatchesPage";
+import SavedProfilesPage from "./pages/SavedProfilesPage";
+import DiscoverProfilePage from "./pages/DiscoverProfilePage";
 import TopNav from "./components/TopNav";
 import Footer from "./components/Footer";
 
@@ -22,6 +24,11 @@ export default function App() {
     );
     const [checking, setChecking] = useState(false);
 
+    // Stores the userId for the DiscoverProfilePage
+    const [selectedProfileId, setSelectedProfileId] = useState(null);
+    // Tracks which page launched the discover view (for back navigation)
+    const [discoverFromPage, setDiscoverFromPage] = useState("feed");
+
     // Global navigate handler
     const handleNavigate = useCallback((target) => {
         if (target === "logout" || target === "force-login") {
@@ -30,6 +37,13 @@ export default function App() {
             return;
         }
         setPage(target);
+    }, []);
+
+    // Navigate to a profile's discover page from a given surface
+    const handleViewProfile = useCallback((userId, fromPage = "feed") => {
+        setSelectedProfileId(userId);
+        setDiscoverFromPage(fromPage);
+        setPage("discover");
     }, []);
 
     // When page is "check-profile", determine if profile exists
@@ -42,7 +56,7 @@ export default function App() {
         profileApi
             .getMyProfile()
             .then(() => {
-                if (!cancelled) setPage("profile");
+                if (!cancelled) setPage("feed");
             })
             .catch((err) => {
                 if (cancelled) return;
@@ -50,7 +64,6 @@ export default function App() {
                     TokenService.logout();
                     setPage("login");
                 } else {
-                    // 404 or any other error = profile doesn't exist yet
                     setPage("create-profile");
                 }
             })
@@ -58,9 +71,7 @@ export default function App() {
                 if (!cancelled) setChecking(false);
             });
 
-        return () => {
-            cancelled = true;
-        };
+        return () => { cancelled = true; };
     }, [page]);
 
     // Loading state while checking profile
@@ -85,11 +96,11 @@ export default function App() {
         );
     }
 
-    // Auth pages — boarding pass layout
-    if (page === "login") return <LoginPage onNavigate={handleNavigate} />;
+    // Auth pages
+    if (page === "login")  return <LoginPage  onNavigate={handleNavigate} />;
     if (page === "signup") return <SignupPage onNavigate={handleNavigate} />;
 
-    // Onboarding — create profile
+    // Onboarding
     if (page === "create-profile") {
         return <CreateProfilePage onNavigate={handleNavigate} />;
     }
@@ -99,13 +110,33 @@ export default function App() {
         return <LoginPage onNavigate={handleNavigate} />;
     }
 
-    // Dashboard pages — TopNav + Footer layout
+    // Dashboard pages
     const renderDashboardContent = () => {
         switch (page) {
             case "feed":
-                return <FeedPage onNavigate={handleNavigate} />;
+                return (
+                    <FeedPage
+                        onNavigate={handleNavigate}
+                        onViewProfile={(userId) => handleViewProfile(userId, "feed")}
+                    />
+                );
+            case "saved":
+                return (
+                    <SavedProfilesPage
+                        onNavigate={handleNavigate}
+                        onViewProfile={(userId) => handleViewProfile(userId, "saved")}
+                    />
+                );
             case "matches":
                 return <MatchesPage onNavigate={handleNavigate} />;
+            case "discover":
+                return (
+                    <DiscoverProfilePage
+                        profileId={selectedProfileId}
+                        fromPage={discoverFromPage}
+                        onNavigate={handleNavigate}
+                    />
+                );
             case "profile":
             default:
                 return (
@@ -117,7 +148,7 @@ export default function App() {
     return (
         <div className="bg-surface font-body text-on-surface min-h-screen flex flex-col">
             <TopNav activeTab={page} onNavigate={handleNavigate} />
-            <main className="mt-24 md:mt-28 mb-12 flex-grow max-w-7xl mx-auto px-4 md:px-12 w-full">
+            <main className="mt-16 md:mt-20 mb-12 flex-grow max-w-7xl mx-auto px-4 md:px-12 w-full">
                 {renderDashboardContent()}
             </main>
             <Footer />

@@ -2,15 +2,19 @@ import TokenService from "../services/tokenService";
 
 export default function TopNav({ activeTab, onNavigate }) {
     const tabs = [
-        { key: "feed", label: "Feed" },
+        { key: "feed",    label: "Feed"       },
+        { key: "saved",   label: "Saved"      },
+        { key: "matches", label: "Matches"    },
         { key: "profile", label: "My Profile" },
-        { key: "matches", label: "Matches" },
     ];
 
     const handleLogout = () => {
         TokenService.logout();
         onNavigate("login");
     };
+
+    // Discover page is a sub-page of feed — highlight Feed tab when on it
+    const resolvedActive = activeTab === "discover" ? "feed" : activeTab;
 
     return (
         <header className="fixed top-0 w-full z-50 bg-primary shadow-[0_24px_48px_rgba(0,29,69,0.06)]">
@@ -20,14 +24,14 @@ export default function TopNav({ activeTab, onNavigate }) {
                     Travel Buddy
                 </div>
 
-                {/* Nav tabs */}
+                {/* Desktop nav tabs */}
                 <div className="hidden md:flex items-center space-x-8">
                     {tabs.map((tab) => (
                         <button
                             key={tab.key}
                             onClick={() => onNavigate(tab.key)}
                             className={`font-headline tracking-tight transition-colors pb-1 ${
-                                activeTab === tab.key
+                                resolvedActive === tab.key
                                     ? "text-tertiary-fixed-dim border-b-2 border-tertiary-fixed-dim font-bold"
                                     : "text-slate-300 hover:text-white"
                             }`}
@@ -46,7 +50,7 @@ export default function TopNav({ activeTab, onNavigate }) {
                                 key={tab.key}
                                 onClick={() => onNavigate(tab.key)}
                                 className={`text-xs font-headline px-2 py-1 rounded-lg transition-colors ${
-                                    activeTab === tab.key
+                                    resolvedActive === tab.key
                                         ? "bg-white/10 text-tertiary-fixed-dim font-bold"
                                         : "text-slate-400"
                                 }`}
@@ -55,6 +59,8 @@ export default function TopNav({ activeTab, onNavigate }) {
                             </button>
                         ))}
                     </div>
+
+                    {/* Logout */}
                     <button
                         onClick={handleLogout}
                         className="text-slate-300 hover:bg-white/10 p-2 rounded-lg transition-all"

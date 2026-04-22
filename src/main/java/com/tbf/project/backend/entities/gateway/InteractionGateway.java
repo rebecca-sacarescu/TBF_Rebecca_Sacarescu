@@ -12,4 +12,6 @@ public interface InteractionGateway {
     ProfileInteraction save(ProfileInteraction interaction);
 
     List<Long> findTargetUserIdsByActorUserId(Long actorUserId);
+
+    void deleteByActorUserIdAndTargetUserId(Long actorUserId, Long targetUserId);
 }

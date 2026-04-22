@@ -6,6 +6,7 @@ import com.tbf.project.backend.entities.gateway.InteractionGateway;
 import com.tbf.project.backend.entities.model.ProfileInteraction;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -42,6 +43,12 @@ public class InteractionGatewayImpl implements InteractionGateway {
         return repository.findAllByActorUserId(actorUserId).stream()
                 .map(ProfileInteractionJpaEntity::getTargetUserId)
                 .toList();
+    }
+
+    @Override
+    @Transactional
+    public void deleteByActorUserIdAndTargetUserId(Long actorUserId, Long targetUserId) {
+        repository.deleteByActorUserIdAndTargetUserId(actorUserId, targetUserId);
     }
 
     private ProfileInteraction toDomain(ProfileInteractionJpaEntity entity) {

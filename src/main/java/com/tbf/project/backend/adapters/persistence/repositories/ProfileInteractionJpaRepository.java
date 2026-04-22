@@ -13,4 +13,6 @@ public interface ProfileInteractionJpaRepository extends JpaRepository<ProfileIn
     Optional<ProfileInteractionJpaEntity> findByActorUserIdAndTargetUserId(Long actorUserId, Long targetUserId);
 
     List<ProfileInteractionJpaEntity> findAllByActorUserId(Long actorUserId);
+
+    void deleteByActorUserIdAndTargetUserId(Long actorUserId, Long targetUserId);
 }

@@ -84,13 +84,15 @@ public class UseCaseConfig {
             InteractionGateway interactionGateway,
             ProfileGateway profileGateway,
             FeedCacheGateway feedCacheGateway,
-            MatchGateway matchGateway
+            MatchGateway matchGateway,
+            SavedProfileGateway savedProfileGateway
     ) {
         return new RecordFeedInteractionUseCaseImpl(
                 interactionGateway,
                 profileGateway,
                 feedCacheGateway,
-                matchGateway
+                matchGateway,
+                savedProfileGateway
         );
     }
 
@@ -112,11 +114,90 @@ public class UseCaseConfig {
     @Bean
     public DeleteMatchUseCase deleteMatchUseCase(
             MatchGateway matchGateway,
-            FeedCacheGateway feedCacheGateway
+            FeedCacheGateway feedCacheGateway,
+            InteractionGateway interactionGateway
     ) {
         return new DeleteMatchUseCaseImpl(
                 matchGateway,
-                feedCacheGateway
+                feedCacheGateway,
+                interactionGateway
+        );
+    }
+
+    @Bean
+    public GetDiscoverProfileUseCase getDiscoverProfileUseCase(
+            ProfileGateway profileGateway,
+            InteractionGateway interactionGateway,
+            MatchGateway matchGateway,
+            SavedProfileGateway savedProfileGateway,
+            ProfileCompatibilityCalculator profileCompatibilityCalculator
+    ) {
+        return new GetDiscoverProfileUseCaseImpl(
+                profileGateway,
+                interactionGateway,
+                matchGateway,
+                savedProfileGateway,
+                profileCompatibilityCalculator
+        );
+    }
+
+    @Bean
+    public RecordProfileInteractionEventUseCase recordProfileInteractionEventUseCase(
+            ProfileGateway profileGateway,
+            InteractionGateway interactionGateway,
+            MatchGateway matchGateway,
+            SavedProfileGateway savedProfileGateway,
+            ProfileInteractionEventGateway profileInteractionEventGateway
+    ) {
+        return new RecordProfileInteractionEventUseCaseImpl(
+                profileGateway,
+                interactionGateway,
+                matchGateway,
+                savedProfileGateway,
+                profileInteractionEventGateway
+        );
+    }
+
+    @Bean
+    public SaveProfileUseCase saveProfileUseCase(
+            ProfileGateway profileGateway,
+            InteractionGateway interactionGateway,
+            MatchGateway matchGateway,
+            SavedProfileGateway savedProfileGateway,
+            ProfileInteractionEventGateway profileInteractionEventGateway
+    ) {
+        return new SaveProfileUseCaseImpl(
+                profileGateway,
+                interactionGateway,
+                matchGateway,
+                savedProfileGateway,
+                profileInteractionEventGateway
+        );
+    }
+
+    @Bean
+    public RemoveSavedProfileUseCase removeSavedProfileUseCase(
+            ProfileGateway profileGateway,
+            SavedProfileGateway savedProfileGateway,
+            ProfileInteractionEventGateway profileInteractionEventGateway
+    ) {
+        return new RemoveSavedProfileUseCaseImpl(
+                profileGateway,
+                savedProfileGateway,
+                profileInteractionEventGateway
+        );
+    }
+
+    @Bean
+    public GetSavedProfilesUseCase getSavedProfilesUseCase(
+            ProfileGateway profileGateway,
+            SavedProfileGateway savedProfileGateway,
+            ProfileCompatibilityCalculator profileCompatibilityCalculator
+    ) {
+        return new GetSavedProfilesUseCaseImpl(
+                profileGateway,
+                savedProfileGateway,
+                profileCompatibilityCalculator
         );
     }
 }

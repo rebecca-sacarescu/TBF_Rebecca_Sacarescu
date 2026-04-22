@@ -6,6 +6,7 @@ import com.tbf.project.backend.entities.gateway.FeedCacheGateway;
 import com.tbf.project.backend.entities.gateway.InteractionGateway;
 import com.tbf.project.backend.entities.gateway.MatchGateway;
 import com.tbf.project.backend.entities.gateway.ProfileGateway;
+import com.tbf.project.backend.entities.gateway.SavedProfileGateway;
 import com.tbf.project.backend.entities.model.Match;
 import com.tbf.project.backend.entities.model.ProfileInteraction;
 import com.tbf.project.backend.entities.model.enums.InteractionType;
@@ -18,17 +19,20 @@ public class RecordFeedInteractionUseCaseImpl implements RecordFeedInteractionUs
     private final ProfileGateway profileGateway;
     private final FeedCacheGateway feedCacheGateway;
     private final MatchGateway matchGateway;
+    private final SavedProfileGateway savedProfileGateway;
 
     public RecordFeedInteractionUseCaseImpl(
             InteractionGateway interactionGateway,
             ProfileGateway profileGateway,
             FeedCacheGateway feedCacheGateway,
-            MatchGateway matchGateway
+            MatchGateway matchGateway,
+            SavedProfileGateway savedProfileGateway
     ) {
         this.interactionGateway = interactionGateway;
         this.profileGateway = profileGateway;
         this.feedCacheGateway = feedCacheGateway;
         this.matchGateway = matchGateway;
+        this.savedProfileGateway = savedProfileGateway;
     }
 
     @Override
@@ -66,6 +70,10 @@ public class RecordFeedInteractionUseCaseImpl implements RecordFeedInteractionUs
 
         interactionGateway.save(interaction);
 
+        if (interactionType == InteractionType.NO) {
+            savedProfileGateway.deleteByActorUserIdAndTargetUserId(actorUserId, targetUserId);
+        }
+
         createMatchIfReciprocalPositive(actorUserId, targetUserId, interactionType);
 
         feedCacheGateway.evictFeed(actorUserId);
@@ -92,6 +100,9 @@ public class RecordFeedInteractionUseCaseImpl implements RecordFeedInteractionUs
                     long user1Id = Math.min(actorUserId, targetUserId);
                     long user2Id = Math.max(actorUserId, targetUserId);
                     LocalDateTime now = LocalDateTime.now();
+
+                    savedProfileGateway.deleteByActorUserIdAndTargetUserId(actorUserId, targetUserId);
+                    savedProfileGateway.deleteByActorUserIdAndTargetUserId(targetUserId, actorUserId);
 
                     return matchGateway.save(Match.builder()
                             .user1Id(user1Id)

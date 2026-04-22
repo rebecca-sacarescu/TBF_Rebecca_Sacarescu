@@ -1,3 +1,5 @@
+// ─── Existing icons ───────────────────────────────────────────────────────────
+
 export function FlightIcon({ size = 24 }) {
     return (
         <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
@@ -70,6 +72,58 @@ export function CheckCircleIcon({ size = 32 }) {
     return (
         <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="#10b981" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
             <path d="M20 6 9 17l-5-5" />
+        </svg>
+    );
+}
+
+// ─── New icons ────────────────────────────────────────────────────────────────
+
+/**
+ * BookmarkIcon — outline when not saved, filled when saved.
+ * @param {{ size?: number, filled?: boolean }} props
+ */
+export function BookmarkIcon({ size = 20, filled = false }) {
+    return filled ? (
+        <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
+            <path d="M17 3H7c-1.1 0-2 .9-2 2v16l7-3 7 3V5c0-1.1-.9-2-2-2z" />
+        </svg>
+    ) : (
+        <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z" />
+        </svg>
+    );
+}
+
+/**
+ * ChevronLeftIcon — back arrow.
+ */
+export function ChevronLeftIcon({ size = 20 }) {
+    return (
+        <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <path d="m15 18-6-6 6-6" />
+        </svg>
+    );
+}
+
+/**
+ * EyeIcon — view full profile affordance.
+ */
+export function EyeIcon({ size = 18 }) {
+    return (
+        <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" />
+            <circle cx="12" cy="12" r="3" />
+        </svg>
+    );
+}
+
+/**
+ * VerifiedIcon — shown on verified profiles.
+ */
+export function VerifiedIcon({ size = 16 }) {
+    return (
+        <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
+            <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
         </svg>
     );
 }
