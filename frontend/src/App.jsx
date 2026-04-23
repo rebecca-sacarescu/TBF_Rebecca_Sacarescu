@@ -15,6 +15,9 @@ import FeedPage from "./pages/FeedPage";
 import MatchesPage from "./pages/MatchesPage";
 import SavedProfilesPage from "./pages/SavedProfilesPage";
 import DiscoverProfilePage from "./pages/DiscoverProfilePage";
+import OpenTripsPage from "./pages/OpenTripsPage";
+import MyTripsPage from "./pages/MyTripsPage";
+
 import TopNav from "./components/TopNav";
 import Footer from "./components/Footer";
 
@@ -137,6 +140,10 @@ export default function App() {
                         onNavigate={handleNavigate}
                     />
                 );
+            case "open-trips":
+                return <OpenTripsPage onNavigate={handleNavigate} />;
+            case "my-trips":
+                return <MyTripsPage onNavigate={handleNavigate} />;
             case "profile":
             default:
                 return (

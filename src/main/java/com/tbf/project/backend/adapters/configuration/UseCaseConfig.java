@@ -200,4 +200,110 @@ public class UseCaseConfig {
                 profileCompatibilityCalculator
         );
     }
+
+    @Bean
+    public CreateTripUseCase createTripUseCase(
+            TripGateway tripGateway,
+            TripMemberGateway tripMemberGateway,
+            ProfileGateway profileGateway
+    ) {
+        return new CreateTripUseCaseImpl(
+                tripGateway,
+                tripMemberGateway,
+                profileGateway
+        );
+    }
+
+    @Bean
+    public GetJoinableTripsUseCase getJoinableTripsUseCase(
+            TripGateway tripGateway,
+            TripMemberGateway tripMemberGateway,
+            TripJoinRequestGateway tripJoinRequestGateway,
+            ProfileGateway profileGateway
+    ) {
+        return new GetJoinableTripsUseCaseImpl(
+                tripGateway,
+                tripMemberGateway,
+                tripJoinRequestGateway,
+                profileGateway
+        );
+    }
+
+    @Bean
+    public RequestToJoinTripUseCase requestToJoinTripUseCase(
+            TripGateway tripGateway,
+            TripMemberGateway tripMemberGateway,
+            TripJoinRequestGateway tripJoinRequestGateway,
+            ProfileGateway profileGateway
+    ) {
+        return new RequestToJoinTripUseCaseImpl(
+                tripGateway,
+                tripMemberGateway,
+                tripJoinRequestGateway,
+                profileGateway
+        );
+    }
+
+    @Bean
+    public GetMyCreatedTripsUseCase getMyCreatedTripsUseCase(
+            TripGateway tripGateway,
+            TripMemberGateway tripMemberGateway,
+            ProfileGateway profileGateway
+    ) {
+        return new GetMyCreatedTripsUseCaseImpl(
+                tripGateway,
+                tripMemberGateway,
+                profileGateway
+        );
+    }
+
+    @Bean
+    public GetMyJoinedTripsUseCase getMyJoinedTripsUseCase(
+            TripGateway tripGateway,
+            TripMemberGateway tripMemberGateway,
+            ProfileGateway profileGateway
+    ) {
+        return new GetMyJoinedTripsUseCaseImpl(
+                tripGateway,
+                tripMemberGateway,
+                profileGateway
+        );
+    }
+
+    @Bean
+    public GetTripJoinRequestsUseCase getTripJoinRequestsUseCase(
+            TripGateway tripGateway,
+            TripJoinRequestGateway tripJoinRequestGateway,
+            ProfileGateway profileGateway
+    ) {
+        return new GetTripJoinRequestsUseCaseImpl(
+                tripGateway,
+                tripJoinRequestGateway,
+                profileGateway
+        );
+    }
+
+    @Bean
+    public ApproveTripJoinRequestUseCase approveTripJoinRequestUseCase(
+            TripGateway tripGateway,
+            TripJoinRequestGateway tripJoinRequestGateway,
+            TripMemberGateway tripMemberGateway
+    ) {
+        return new ApproveTripJoinRequestUseCaseImpl(
+                tripGateway,
+                tripJoinRequestGateway,
+                tripMemberGateway
+        );
+    }
+
+    @Bean
+    public RejectTripJoinRequestUseCase rejectTripJoinRequestUseCase(
+            TripGateway tripGateway,
+            TripJoinRequestGateway tripJoinRequestGateway
+    ) {
+        return new RejectTripJoinRequestUseCaseImpl(
+                tripGateway,
+                tripJoinRequestGateway
+        );
+    }
 }
