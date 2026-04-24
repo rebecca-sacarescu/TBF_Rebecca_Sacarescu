@@ -15,6 +15,7 @@ public record FeedItemResponseDto(
         List<String> activities,
         List<String> languages,
         List<String> lookingForWhat,
-        int compatibilityScore
+        int reciprocalCompatibilityScore,
+        List<String> compatibilityHighlights
 ) {
 }

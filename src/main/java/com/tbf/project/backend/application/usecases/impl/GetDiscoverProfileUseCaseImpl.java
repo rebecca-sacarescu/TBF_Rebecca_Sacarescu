@@ -1,8 +1,9 @@
 package com.tbf.project.backend.application.usecases.impl;
 
 import com.tbf.project.backend.application.dto.DiscoverProfileResponseDto;
+import com.tbf.project.backend.application.dto.ReciprocalCompatibilityResult;
 import com.tbf.project.backend.application.mapper.DiscoverMapper;
-import com.tbf.project.backend.application.service.ProfileCompatibilityCalculator;
+import com.tbf.project.backend.application.service.ReciprocalCompatibilityCalculator;
 import com.tbf.project.backend.application.usecases.GetDiscoverProfileUseCase;
 import com.tbf.project.backend.entities.gateway.InteractionGateway;
 import com.tbf.project.backend.entities.gateway.MatchGateway;
@@ -16,20 +17,20 @@ public class GetDiscoverProfileUseCaseImpl implements GetDiscoverProfileUseCase 
     private final InteractionGateway interactionGateway;
     private final MatchGateway matchGateway;
     private final SavedProfileGateway savedProfileGateway;
-    private final ProfileCompatibilityCalculator compatibilityCalculator;
+    private final ReciprocalCompatibilityCalculator reciprocalCompatibilityCalculator;
 
     public GetDiscoverProfileUseCaseImpl(
             ProfileGateway profileGateway,
             InteractionGateway interactionGateway,
             MatchGateway matchGateway,
             SavedProfileGateway savedProfileGateway,
-            ProfileCompatibilityCalculator compatibilityCalculator
+            ReciprocalCompatibilityCalculator reciprocalCompatibilityCalculator
     ) {
         this.profileGateway = profileGateway;
         this.interactionGateway = interactionGateway;
         this.matchGateway = matchGateway;
         this.savedProfileGateway = savedProfileGateway;
-        this.compatibilityCalculator = compatibilityCalculator;
+        this.reciprocalCompatibilityCalculator = reciprocalCompatibilityCalculator;
     }
 
     @Override
@@ -58,8 +59,9 @@ public class GetDiscoverProfileUseCaseImpl implements GetDiscoverProfileUseCase 
             throw new IllegalArgumentException("Target profile is not available in discovery.");
         }
 
-        int compatibilityScore = compatibilityCalculator.calculateScore(actorProfile, targetProfile);
+        ReciprocalCompatibilityResult compatibilityResult =
+                reciprocalCompatibilityCalculator.calculate(actorProfile, targetProfile);
 
-        return DiscoverMapper.toDto(targetProfile, compatibilityScore, isSaved);
+        return DiscoverMapper.toDto(targetProfile, compatibilityResult, isSaved);
     }
 }

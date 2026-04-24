@@ -1,14 +1,14 @@
 package com.tbf.project.backend.application.usecases.impl;
 
 import com.tbf.project.backend.application.dto.FeedItemResponseDto;
+import com.tbf.project.backend.application.dto.ReciprocalCompatibilityResult;
 import com.tbf.project.backend.application.mapper.FeedMapper;
-import com.tbf.project.backend.application.service.ProfileCompatibilityCalculator;
+import com.tbf.project.backend.application.service.ReciprocalCompatibilityCalculator;
 import com.tbf.project.backend.application.usecases.GetFeedUseCase;
 import com.tbf.project.backend.entities.gateway.FeedCacheGateway;
 import com.tbf.project.backend.entities.gateway.InteractionGateway;
 import com.tbf.project.backend.entities.gateway.MatchGateway;
 import com.tbf.project.backend.entities.gateway.ProfileGateway;
-import com.tbf.project.backend.entities.model.Match;
 import com.tbf.project.backend.entities.model.UserProfile;
 
 import java.util.*;
@@ -19,20 +19,20 @@ public class GetFeedUseCaseImpl implements GetFeedUseCase {
 
     private final ProfileGateway profileGateway;
     private final FeedCacheGateway feedCacheGateway;
-    private final ProfileCompatibilityCalculator compatibilityCalculator;
+    private final ReciprocalCompatibilityCalculator reciprocalCompatibilityCalculator;
     private final InteractionGateway interactionGateway;
     private final MatchGateway matchGateway;
 
     public GetFeedUseCaseImpl(
             ProfileGateway profileGateway,
             FeedCacheGateway feedCacheGateway,
-            ProfileCompatibilityCalculator compatibilityCalculator,
+            ReciprocalCompatibilityCalculator reciprocalCompatibilityCalculator,
             InteractionGateway interactionGateway,
             MatchGateway matchGateway
     ) {
         this.profileGateway = profileGateway;
         this.feedCacheGateway = feedCacheGateway;
-        this.compatibilityCalculator = compatibilityCalculator;
+        this.reciprocalCompatibilityCalculator = reciprocalCompatibilityCalculator;
         this.interactionGateway = interactionGateway;
         this.matchGateway = matchGateway;
     }
@@ -62,17 +62,18 @@ public class GetFeedUseCaseImpl implements GetFeedUseCase {
                 .toList();
 
         List<ScoredProfile> scoredProfiles = candidates.stream()
-                .map(candidate -> new ScoredProfile(
-                        candidate,
-                        compatibilityCalculator.calculateScore(currentUserProfile, candidate)
-                ))
-                .sorted(Comparator.comparingInt(ScoredProfile::score).reversed())
+                .map((UserProfile candidate) -> {
+                    ReciprocalCompatibilityResult result =
+                            reciprocalCompatibilityCalculator.calculate(currentUserProfile, candidate);
+                    return new ScoredProfile(candidate, result);
+                })
+                .sorted(Comparator.<ScoredProfile>comparingInt(item -> item.result().reciprocalScore100()).reversed())
                 .toList();
 
         List<FeedCacheGateway.CandidateScore> ranking = scoredProfiles.stream()
                 .map(item -> new FeedCacheGateway.CandidateScore(
                         item.profile().getUserId(),
-                        item.score()
+                        item.result().reciprocalScore100()
                 ))
                 .toList();
 
@@ -81,7 +82,7 @@ public class GetFeedUseCaseImpl implements GetFeedUseCase {
         return scoredProfiles.stream()
                 .skip((long) page * size)
                 .limit(size)
-                .map(item -> FeedMapper.toFeedItemDto(item.profile(), item.score()))
+                .map(item -> FeedMapper.toFeedItemDto(item.profile(), item.result()))
                 .toList();
     }
 
@@ -100,14 +101,16 @@ public class GetFeedUseCaseImpl implements GetFeedUseCase {
             UserProfile candidate = profilesByUserId.get(candidateId);
 
             if (candidate != null) {
-                int score = compatibilityCalculator.calculateScore(currentUserProfile, candidate);
-                result.add(FeedMapper.toFeedItemDto(candidate, score));
+                ReciprocalCompatibilityResult compatibilityResult =
+                        reciprocalCompatibilityCalculator.calculate(currentUserProfile, candidate);
+
+                result.add(FeedMapper.toFeedItemDto(candidate, compatibilityResult));
             }
         }
 
         return result;
     }
 
-    private record ScoredProfile(UserProfile profile, int score) {
+    private record ScoredProfile(UserProfile profile, ReciprocalCompatibilityResult result) {
     }
 }

@@ -1,6 +1,7 @@
 package com.tbf.project.backend.application.mapper;
 
 import com.tbf.project.backend.application.dto.DiscoverProfileResponseDto;
+import com.tbf.project.backend.application.dto.ReciprocalCompatibilityResult;
 import com.tbf.project.backend.entities.model.UserProfile;
 
 import java.time.LocalDate;
@@ -14,7 +15,7 @@ public class DiscoverMapper {
 
     public static DiscoverProfileResponseDto toDto(
             UserProfile profile,
-            int compatibilityScore,
+            ReciprocalCompatibilityResult compatibilityResult,
             boolean saved
     ) {
         int age = Period.between(profile.getBirthDate(), LocalDate.now()).getYears();
@@ -39,7 +40,8 @@ public class DiscoverMapper {
                 safeList(profile.getLanguages()),
                 safeList(profile.getLookingForWho()),
                 safeList(profile.getLookingForWhat()),
-                compatibilityScore,
+                compatibilityResult.reciprocalScore100(),
+                compatibilityResult.highlights(),
                 saved
         );
     }

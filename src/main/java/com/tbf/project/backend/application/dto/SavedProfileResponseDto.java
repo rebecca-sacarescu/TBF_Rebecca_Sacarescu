@@ -13,7 +13,7 @@ public record SavedProfileResponseDto(
         String socialBattery,
         String planningStyle,
         String budget,
-        int compatibilityScore,
+        int reciprocalCompatibilityScore,
         LocalDateTime savedAt
 ) {
 }

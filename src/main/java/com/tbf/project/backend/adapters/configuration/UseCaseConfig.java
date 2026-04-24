@@ -1,6 +1,10 @@
 package com.tbf.project.backend.adapters.configuration;
 
-import com.tbf.project.backend.application.service.ProfileCompatibilityCalculator;
+import com.tbf.project.backend.application.service.CompatibilityExplanationService;
+import com.tbf.project.backend.application.service.CompatibilityPenaltyCalculator;
+import com.tbf.project.backend.application.service.DirectionalProfileSimilarityCalculator;
+import com.tbf.project.backend.application.service.ProfileVectorizer;
+import com.tbf.project.backend.application.service.ReciprocalCompatibilityCalculator;
 import com.tbf.project.backend.application.usecases.*;
 import com.tbf.project.backend.application.usecases.impl.*;
 import com.tbf.project.backend.entities.gateway.*;
@@ -58,22 +62,54 @@ public class UseCaseConfig {
     }
 
     @Bean
-    public ProfileCompatibilityCalculator profileCompatibilityCalculator() {
-        return new ProfileCompatibilityCalculator();
+    public ProfileVectorizer profileVectorizer() {
+        return new ProfileVectorizer();
+    }
+
+    @Bean
+    public DirectionalProfileSimilarityCalculator directionalProfileSimilarityCalculator(
+            ProfileVectorizer profileVectorizer
+    ) {
+        return new DirectionalProfileSimilarityCalculator(profileVectorizer);
+    }
+
+    @Bean
+    public CompatibilityPenaltyCalculator compatibilityPenaltyCalculator(
+            ProfileVectorizer profileVectorizer
+    ) {
+        return new CompatibilityPenaltyCalculator(profileVectorizer);
+    }
+
+    @Bean
+    public ReciprocalCompatibilityCalculator reciprocalCompatibilityCalculator(
+            DirectionalProfileSimilarityCalculator directionalProfileSimilarityCalculator,
+            CompatibilityPenaltyCalculator compatibilityPenaltyCalculator
+    ) {
+        return new ReciprocalCompatibilityCalculator(
+                directionalProfileSimilarityCalculator,
+                compatibilityPenaltyCalculator
+        );
+    }
+
+    @Bean
+    public CompatibilityExplanationService compatibilityExplanationService(
+            ProfileVectorizer profileVectorizer
+    ) {
+        return new CompatibilityExplanationService(profileVectorizer);
     }
 
     @Bean
     public GetFeedUseCase getFeedUseCase(
             ProfileGateway profileGateway,
             FeedCacheGateway feedCacheGateway,
-            ProfileCompatibilityCalculator profileCompatibilityCalculator,
+            ReciprocalCompatibilityCalculator reciprocalCompatibilityCalculator,
             InteractionGateway interactionGateway,
             MatchGateway matchGateway
     ) {
         return new GetFeedUseCaseImpl(
                 profileGateway,
                 feedCacheGateway,
-                profileCompatibilityCalculator,
+                reciprocalCompatibilityCalculator,
                 interactionGateway,
                 matchGateway
         );
@@ -101,13 +137,15 @@ public class UseCaseConfig {
             MatchGateway matchGateway,
             ProfileGateway profileGateway,
             InteractionGateway interactionGateway,
-            ProfileCompatibilityCalculator profileCompatibilityCalculator
+            ReciprocalCompatibilityCalculator reciprocalCompatibilityCalculator,
+            CompatibilityExplanationService compatibilityExplanationService
     ) {
         return new GetMyMatchesUseCaseImpl(
                 matchGateway,
                 profileGateway,
                 interactionGateway,
-                profileCompatibilityCalculator
+                reciprocalCompatibilityCalculator,
+                compatibilityExplanationService
         );
     }
 
@@ -130,14 +168,14 @@ public class UseCaseConfig {
             InteractionGateway interactionGateway,
             MatchGateway matchGateway,
             SavedProfileGateway savedProfileGateway,
-            ProfileCompatibilityCalculator profileCompatibilityCalculator
+            ReciprocalCompatibilityCalculator reciprocalCompatibilityCalculator
     ) {
         return new GetDiscoverProfileUseCaseImpl(
                 profileGateway,
                 interactionGateway,
                 matchGateway,
                 savedProfileGateway,
-                profileCompatibilityCalculator
+                reciprocalCompatibilityCalculator
         );
     }
 
@@ -192,12 +230,12 @@ public class UseCaseConfig {
     public GetSavedProfilesUseCase getSavedProfilesUseCase(
             ProfileGateway profileGateway,
             SavedProfileGateway savedProfileGateway,
-            ProfileCompatibilityCalculator profileCompatibilityCalculator
+            ReciprocalCompatibilityCalculator reciprocalCompatibilityCalculator
     ) {
         return new GetSavedProfilesUseCaseImpl(
                 profileGateway,
                 savedProfileGateway,
-                profileCompatibilityCalculator
+                reciprocalCompatibilityCalculator
         );
     }
 

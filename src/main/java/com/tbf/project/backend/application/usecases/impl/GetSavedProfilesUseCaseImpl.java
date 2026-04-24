@@ -1,8 +1,9 @@
 package com.tbf.project.backend.application.usecases.impl;
 
+import com.tbf.project.backend.application.dto.ReciprocalCompatibilityResult;
 import com.tbf.project.backend.application.dto.SavedProfileResponseDto;
 import com.tbf.project.backend.application.mapper.SavedProfileMapper;
-import com.tbf.project.backend.application.service.ProfileCompatibilityCalculator;
+import com.tbf.project.backend.application.service.ReciprocalCompatibilityCalculator;
 import com.tbf.project.backend.application.usecases.GetSavedProfilesUseCase;
 import com.tbf.project.backend.entities.gateway.ProfileGateway;
 import com.tbf.project.backend.entities.gateway.SavedProfileGateway;
@@ -18,16 +19,16 @@ public class GetSavedProfilesUseCaseImpl implements GetSavedProfilesUseCase {
 
     private final ProfileGateway profileGateway;
     private final SavedProfileGateway savedProfileGateway;
-    private final ProfileCompatibilityCalculator compatibilityCalculator;
+    private final ReciprocalCompatibilityCalculator reciprocalCompatibilityCalculator;
 
     public GetSavedProfilesUseCaseImpl(
             ProfileGateway profileGateway,
             SavedProfileGateway savedProfileGateway,
-            ProfileCompatibilityCalculator compatibilityCalculator
+            ReciprocalCompatibilityCalculator reciprocalCompatibilityCalculator
     ) {
         this.profileGateway = profileGateway;
         this.savedProfileGateway = savedProfileGateway;
-        this.compatibilityCalculator = compatibilityCalculator;
+        this.reciprocalCompatibilityCalculator = reciprocalCompatibilityCalculator;
     }
 
     @Override
@@ -51,8 +52,14 @@ public class GetSavedProfilesUseCaseImpl implements GetSavedProfilesUseCase {
                         return null;
                     }
 
-                    int compatibilityScore = compatibilityCalculator.calculateScore(actorProfile, targetProfile);
-                    return SavedProfileMapper.toDto(saved, targetProfile, compatibilityScore);
+                    ReciprocalCompatibilityResult compatibilityResult =
+                            reciprocalCompatibilityCalculator.calculate(actorProfile, targetProfile);
+
+                    return SavedProfileMapper.toDto(
+                            saved,
+                            targetProfile,
+                            compatibilityResult.reciprocalScore100()
+                    );
                 })
                 .filter(dto -> dto != null)
                 .sorted((a, b) -> b.savedAt().compareTo(a.savedAt()))

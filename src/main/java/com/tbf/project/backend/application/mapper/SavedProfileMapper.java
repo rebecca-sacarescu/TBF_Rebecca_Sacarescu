@@ -15,7 +15,7 @@ public class SavedProfileMapper {
     public static SavedProfileResponseDto toDto(
             SavedProfile savedProfile,
             UserProfile targetProfile,
-            int compatibilityScore
+            int reciprocalCompatibilityScore
     ) {
         int age = Period.between(targetProfile.getBirthDate(), LocalDate.now()).getYears();
 
@@ -30,7 +30,7 @@ public class SavedProfileMapper {
                 targetProfile.getSocialBattery().name(),
                 targetProfile.getPlanningStyle().name(),
                 targetProfile.getBudget().name(),
-                compatibilityScore,
+                reciprocalCompatibilityScore,
                 savedProfile.getCreatedAt()
         );
     }

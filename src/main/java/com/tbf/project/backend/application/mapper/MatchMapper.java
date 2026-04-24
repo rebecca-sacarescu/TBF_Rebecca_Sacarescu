@@ -16,7 +16,7 @@ public class MatchMapper {
     public static MatchResponseDto toDto(
             Match match,
             UserProfile otherProfile,
-            int compatibilityScore,
+            int reciprocalCompatibilityScore,
             boolean superLikeInvolved,
             List<String> contextBadges,
             String whyYouMatched
@@ -35,7 +35,7 @@ public class MatchMapper {
                 otherProfile.getSocialBattery().name(),
                 otherProfile.getPlanningStyle().name(),
                 otherProfile.getBudget().name(),
-                compatibilityScore,
+                reciprocalCompatibilityScore,
                 superLikeInvolved,
                 match.getCreatedAt(),
                 contextBadges,

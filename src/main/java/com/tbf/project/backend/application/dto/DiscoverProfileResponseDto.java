@@ -22,7 +22,8 @@ public record DiscoverProfileResponseDto(
         List<String> languages,
         List<String> lookingForWho,
         List<String> lookingForWhat,
-        int compatibilityScore,
+        int reciprocalCompatibilityScore,
+        List<String> compatibilityHighlights,
         boolean saved
 ) {
 }

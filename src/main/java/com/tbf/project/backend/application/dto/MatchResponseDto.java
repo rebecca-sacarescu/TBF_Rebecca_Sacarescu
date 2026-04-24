@@ -15,7 +15,7 @@ public record MatchResponseDto(
         String socialBattery,
         String planningStyle,
         String budget,
-        int compatibilityScore,
+        int reciprocalCompatibilityScore,
         boolean superLikeInvolved,
         LocalDateTime matchedAt,
         List<String> contextBadges,

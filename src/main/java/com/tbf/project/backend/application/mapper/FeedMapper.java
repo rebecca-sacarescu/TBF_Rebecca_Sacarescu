@@ -1,6 +1,7 @@
 package com.tbf.project.backend.application.mapper;
 
 import com.tbf.project.backend.application.dto.FeedItemResponseDto;
+import com.tbf.project.backend.application.dto.ReciprocalCompatibilityResult;
 import com.tbf.project.backend.entities.model.UserProfile;
 
 import java.time.LocalDate;
@@ -12,7 +13,10 @@ public class FeedMapper {
     private FeedMapper() {
     }
 
-    public static FeedItemResponseDto toFeedItemDto(UserProfile profile, int compatibilityScore) {
+    public static FeedItemResponseDto toFeedItemDto(
+            UserProfile profile,
+            ReciprocalCompatibilityResult compatibilityResult
+    ) {
         int age = Period.between(profile.getBirthDate(), LocalDate.now()).getYears();
 
         return new FeedItemResponseDto(
@@ -28,7 +32,8 @@ public class FeedMapper {
                 safeList(profile.getActivities()),
                 safeList(profile.getLanguages()),
                 safeList(profile.getLookingForWhat()),
-                compatibilityScore
+                compatibilityResult.reciprocalScore100(),
+                compatibilityResult.highlights()
         );
     }
 
