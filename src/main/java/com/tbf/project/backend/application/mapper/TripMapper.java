@@ -1,10 +1,14 @@
 package com.tbf.project.backend.application.mapper;
 
 import com.tbf.project.backend.application.dto.TripCardResponseDto;
+import com.tbf.project.backend.application.dto.TripCountdownDto;
 import com.tbf.project.backend.application.dto.TripJoinRequestResponseDto;
+import com.tbf.project.backend.application.dto.TripMemberPreviewDto;
 import com.tbf.project.backend.entities.model.Trip;
 import com.tbf.project.backend.entities.model.TripJoinRequest;
 import com.tbf.project.backend.entities.model.UserProfile;
+
+import java.util.List;
 
 public class TripMapper {
 
@@ -14,7 +18,9 @@ public class TripMapper {
     public static TripCardResponseDto toTripCardDto(
             Trip trip,
             UserProfile ownerProfile,
-            int currentMemberCount
+            int currentMemberCount,
+            List<TripMemberPreviewDto> memberPreview,
+            TripCountdownDto countdown
     ) {
         int spotsLeft = Math.max(0, trip.getTargetGroupSize() - currentMemberCount);
 
@@ -34,7 +40,9 @@ public class TripMapper {
                 trip.getTargetGroupSize(),
                 currentMemberCount,
                 spotsLeft,
-                trip.getStatus().name()
+                trip.getStatus().name(),
+                memberPreview,
+                countdown
         );
     }
 

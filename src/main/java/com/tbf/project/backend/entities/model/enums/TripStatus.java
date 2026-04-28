@@ -4,5 +4,6 @@ public enum TripStatus {
     OPEN,
     FULL,
     CLOSED,
-    CANCELLED
+    CANCELLED,
+    EXPIRED
 }

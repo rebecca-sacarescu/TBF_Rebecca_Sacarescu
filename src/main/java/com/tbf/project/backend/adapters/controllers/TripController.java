@@ -11,7 +11,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
-
+import com.tbf.project.backend.application.dto.TripCrewInsightsResponseDto;
+import com.tbf.project.backend.application.usecases.GetTripCrewInsightsUseCase;
 import java.util.List;
 
 @RestController
@@ -27,6 +28,7 @@ public class TripController {
     private final GetTripJoinRequestsUseCase getTripJoinRequestsUseCase;
     private final ApproveTripJoinRequestUseCase approveTripJoinRequestUseCase;
     private final RejectTripJoinRequestUseCase rejectTripJoinRequestUseCase;
+    private final GetTripCrewInsightsUseCase getTripCrewInsightsUseCase;
 
     @PostMapping
     public ResponseEntity<TripCardResponseDto> createTrip(
@@ -101,5 +103,17 @@ public class TripController {
         Long currentUserId = userDetails.getUser().getId();
         rejectTripJoinRequestUseCase.execute(currentUserId, tripId, requestId);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/{tripId}/crew-insights")
+    public ResponseEntity<TripCrewInsightsResponseDto> getCrewInsights(
+            @AuthenticationPrincipal CustomUserDetails currentUser,
+            @PathVariable Long tripId
+    ) {
+        Long currentUserId = currentUser.getUser().getId();
+
+        return ResponseEntity.ok(
+                getTripCrewInsightsUseCase.execute(currentUserId, tripId)
+        );
     }
 }

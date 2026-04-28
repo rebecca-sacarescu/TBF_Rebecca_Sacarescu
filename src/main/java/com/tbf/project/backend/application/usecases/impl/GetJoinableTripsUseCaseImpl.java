@@ -2,6 +2,7 @@ package com.tbf.project.backend.application.usecases.impl;
 
 import com.tbf.project.backend.application.dto.TripCardResponseDto;
 import com.tbf.project.backend.application.mapper.TripMapper;
+import com.tbf.project.backend.application.service.TripCardEnrichmentService;
 import com.tbf.project.backend.application.usecases.GetJoinableTripsUseCase;
 import com.tbf.project.backend.entities.gateway.ProfileGateway;
 import com.tbf.project.backend.entities.gateway.TripGateway;
@@ -22,24 +23,29 @@ public class GetJoinableTripsUseCaseImpl implements GetJoinableTripsUseCase {
     private final TripMemberGateway tripMemberGateway;
     private final TripJoinRequestGateway tripJoinRequestGateway;
     private final ProfileGateway profileGateway;
+    private final TripCardEnrichmentService tripCardEnrichmentService;
 
     public GetJoinableTripsUseCaseImpl(
             TripGateway tripGateway,
             TripMemberGateway tripMemberGateway,
             TripJoinRequestGateway tripJoinRequestGateway,
-            ProfileGateway profileGateway
+            ProfileGateway profileGateway,
+            TripCardEnrichmentService tripCardEnrichmentService
     ) {
         this.tripGateway = tripGateway;
         this.tripMemberGateway = tripMemberGateway;
         this.tripJoinRequestGateway = tripJoinRequestGateway;
         this.profileGateway = profileGateway;
+        this.tripCardEnrichmentService = tripCardEnrichmentService;
     }
 
     @Override
     public List<TripCardResponseDto> execute(Long currentUserId) {
-        List<Trip> candidates = tripGateway.findAllByStatusAndStartDateGreaterThanEqualAndOwnerUserIdNot(
+        LocalDate today = LocalDate.now();
+
+        List<Trip> candidates = tripGateway.findAllByStatusAndEndDateGreaterThanEqualAndOwnerUserIdNot(
                 TripStatus.OPEN,
-                LocalDate.now(),
+                today,
                 currentUserId
         );
 
@@ -52,12 +58,20 @@ public class GetJoinableTripsUseCaseImpl implements GetJoinableTripsUseCase {
                 ))
                 .map(trip -> {
                     int currentMembers = (int) tripMemberGateway.countActiveByTripId(trip.getId());
+
                     if (currentMembers >= trip.getTargetGroupSize()) {
                         return null;
                     }
 
                     UserProfile ownerProfile = profileGateway.findById(trip.getOwnerUserId()).orElse(null);
-                    return TripMapper.toTripCardDto(trip, ownerProfile, currentMembers);
+
+                    return TripMapper.toTripCardDto(
+                            trip,
+                            ownerProfile,
+                            currentMembers,
+                            tripCardEnrichmentService.buildMemberPreview(trip.getId()),
+                            tripCardEnrichmentService.buildCountdown(trip)
+                    );
                 })
                 .filter(dto -> dto != null)
                 .sorted(Comparator.comparing(TripCardResponseDto::startDate))

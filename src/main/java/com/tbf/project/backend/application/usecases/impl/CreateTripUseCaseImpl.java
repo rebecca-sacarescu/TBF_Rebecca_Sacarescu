@@ -15,6 +15,7 @@ import com.tbf.project.backend.entities.model.enums.TripMemberRole;
 import com.tbf.project.backend.entities.model.enums.TripMemberStatus;
 import com.tbf.project.backend.entities.model.enums.TripStatus;
 import com.tbf.project.backend.entities.model.enums.TripType;
+import com.tbf.project.backend.application.service.TripCardEnrichmentService;
 
 import java.time.LocalDateTime;
 
@@ -23,15 +24,18 @@ public class CreateTripUseCaseImpl implements CreateTripUseCase {
     private final TripGateway tripGateway;
     private final TripMemberGateway tripMemberGateway;
     private final ProfileGateway profileGateway;
+    private final TripCardEnrichmentService tripCardEnrichmentService;
 
     public CreateTripUseCaseImpl(
             TripGateway tripGateway,
             TripMemberGateway tripMemberGateway,
-            ProfileGateway profileGateway
+            ProfileGateway profileGateway,
+            TripCardEnrichmentService tripCardEnrichmentService
     ) {
         this.tripGateway = tripGateway;
         this.tripMemberGateway = tripMemberGateway;
         this.profileGateway = profileGateway;
+        this.tripCardEnrichmentService = tripCardEnrichmentService;
     }
 
     @Override
@@ -72,9 +76,14 @@ public class CreateTripUseCaseImpl implements CreateTripUseCase {
                 .joinedAt(now)
                 .build());
 
-        return TripMapper.toTripCardDto(savedTrip, ownerProfile, 1);
+        return TripMapper.toTripCardDto(
+                savedTrip,
+                ownerProfile,
+                1,
+                tripCardEnrichmentService.buildMemberPreview(savedTrip.getId()),
+                tripCardEnrichmentService.buildCountdown(savedTrip)
+        );
     }
-
     private Budget parseBudget(String rawValue) {
         try {
             return Budget.valueOf(rawValue.trim().toUpperCase());

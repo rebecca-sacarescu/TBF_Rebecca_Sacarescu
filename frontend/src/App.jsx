@@ -12,6 +12,7 @@ import SavedProfilesPage from "./pages/SavedProfilesPage";
 import DiscoverProfilePage from "./pages/DiscoverProfilePage";
 import OpenTripsPage from "./pages/OpenTripsPage";
 import MyTripsPage from "./pages/MyTripsPage";
+import TripRoomPage from "./pages/TripRoomPage";
 import TopNav from "./components/TopNav";
 import Footer from "./components/Footer";
 
@@ -22,10 +23,15 @@ export default function App() {
     const [checking, setChecking] = useState(false);
     const [selectedProfileId, setSelectedProfileId] = useState(null);
     const [discoverFromPage, setDiscoverFromPage] = useState("feed");
+    const [tripRoomTripId, setTripRoomTripId] = useState(null);
+
+    // ── NEW: userId extras din profilul curent, folosit in TripChatPanel ──────
+    const [currentUserId, setCurrentUserId] = useState(null);
 
     const handleNavigate = useCallback((target) => {
         if (target === "logout" || target === "force-login") {
             TokenService.logout();
+            setCurrentUserId(null); // curata userId la logout
             setPage("login");
             return;
         }
@@ -38,17 +44,34 @@ export default function App() {
         setPage("discover");
     }, []);
 
+    const handleOpenTripRoom = useCallback((tripId) => {
+        setTripRoomTripId(tripId ?? null);
+        setPage("trip-room");
+    }, []);
+
     useEffect(() => {
         if (page !== "check-profile") return;
         let cancelled = false;
         setChecking(true);
         profileApi
             .getMyProfile()
-            .then(() => { if (!cancelled) setPage("feed"); })
+            .then((profile) => {
+                if (cancelled) return;
+                // Salveaza userId din profilul returnat de backend
+                if (profile?.userId != null) {
+                    setCurrentUserId(profile.userId);
+                } else if (profile?.id != null) {
+                    // fallback daca campul se numeste "id" in loc de "userId"
+                    setCurrentUserId(profile.id);
+                }
+                setPage("feed");
+            })
             .catch((err) => {
                 if (cancelled) return;
                 if (err?.status === 401 || err?.status === 403) {
-                    TokenService.logout(); setPage("login");
+                    TokenService.logout();
+                    setCurrentUserId(null);
+                    setPage("login");
                 } else {
                     setPage("create-profile");
                 }
@@ -98,7 +121,16 @@ export default function App() {
             case "open-trips":
                 return <OpenTripsPage onNavigate={handleNavigate} />;
             case "my-trips":
-                return <MyTripsPage onNavigate={handleNavigate} />;
+                return <MyTripsPage onNavigate={handleNavigate} onOpenRoom={handleOpenTripRoom} />;
+            case "trip-room":
+                return (
+                    <TripRoomPage
+                        onNavigate={handleNavigate}
+                        initialTripId={tripRoomTripId}
+                        onViewProfile={(userId) => handleViewProfile(userId, "trip-room")}
+                        currentUserId={currentUserId}
+                    />
+                );
             case "profile":
             default:
                 return <MyProfilePage onAuthError={() => handleNavigate("force-login")} />;
@@ -106,13 +138,8 @@ export default function App() {
     };
 
     return (
-        // Global background — warm beige across entire app
         <div style={{ background: "#E9E3DE", minHeight: "100vh", display: "flex", flexDirection: "column" }}>
             <TopNav activeTab={page} onNavigate={handleNavigate} />
-            {/*
-                mt-[72px] matches the new navbar height (72px).
-                Horizontal padding kept identical to original.
-            */}
             <main
                 className="flex-grow w-full max-w-7xl mx-auto px-4 md:px-12"
                 style={{ marginTop: "72px", marginBottom: "48px" }}

@@ -26,8 +26,6 @@ function authHeaders() {
 /**
  * POST /trips
  * Creates a new trip. Owner is derived from JWT.
- * @param {import("../types/trips").CreateTripInputDto} data
- * @returns {Promise<import("../types/trips").TripCardResponseDto>}
  */
 export async function createTrip(data) {
     const response = await fetch(`${BASE_URL}/trips`, {
@@ -44,8 +42,6 @@ export async function createTrip(data) {
 
 /**
  * GET /trips/joinable
- * Returns all open trips the current user can join.
- * @returns {Promise<import("../types/trips").TripCardResponseDto[]>}
  */
 export async function getJoinableTrips() {
     const response = await fetch(`${BASE_URL}/trips/joinable`, {
@@ -61,8 +57,6 @@ export async function getJoinableTrips() {
 
 /**
  * GET /trips/mine/created
- * Returns trips created by the current user.
- * @returns {Promise<import("../types/trips").TripCardResponseDto[]>}
  */
 export async function getMyCreatedTrips() {
     const response = await fetch(`${BASE_URL}/trips/mine/created`, {
@@ -78,8 +72,6 @@ export async function getMyCreatedTrips() {
 
 /**
  * GET /trips/mine/joined
- * Returns trips the current user has joined.
- * @returns {Promise<import("../types/trips").TripCardResponseDto[]>}
  */
 export async function getMyJoinedTrips() {
     const response = await fetch(`${BASE_URL}/trips/mine/joined`, {
@@ -95,10 +87,6 @@ export async function getMyJoinedTrips() {
 
 /**
  * POST /trips/{tripId}/join-requests
- * Sends a join request for a trip.
- * @param {number} tripId
- * @param {{ message: string }} data
- * @returns {Promise<import("../types/trips").TripJoinRequestResponseDto>}
  */
 export async function requestToJoinTrip(tripId, data) {
     const response = await fetch(`${BASE_URL}/trips/${tripId}/join-requests`, {
@@ -115,9 +103,6 @@ export async function requestToJoinTrip(tripId, data) {
 
 /**
  * GET /trips/{tripId}/join-requests
- * Returns pending join requests for a trip. Owner only.
- * @param {number} tripId
- * @returns {Promise<import("../types/trips").TripJoinRequestResponseDto[]>}
  */
 export async function getTripJoinRequests(tripId) {
     const response = await fetch(`${BASE_URL}/trips/${tripId}/join-requests`, {
@@ -133,18 +118,11 @@ export async function getTripJoinRequests(tripId) {
 
 /**
  * POST /trips/{tripId}/join-requests/{requestId}/approve
- * Approves a join request. Owner only.
- * @param {number} tripId
- * @param {number} requestId
- * @returns {Promise<void>}
  */
 export async function approveJoinRequest(tripId, requestId) {
     const response = await fetch(
         `${BASE_URL}/trips/${tripId}/join-requests/${requestId}/approve`,
-        {
-            method: "POST",
-            headers: authHeaders(),
-        }
+        { method: "POST", headers: authHeaders() }
     );
     if (!response.ok) {
         const err = await parseBackendError(response);
@@ -154,21 +132,41 @@ export async function approveJoinRequest(tripId, requestId) {
 
 /**
  * POST /trips/{tripId}/join-requests/{requestId}/reject
- * Rejects a join request. Owner only.
- * @param {number} tripId
- * @param {number} requestId
- * @returns {Promise<void>}
  */
 export async function rejectJoinRequest(tripId, requestId) {
     const response = await fetch(
         `${BASE_URL}/trips/${tripId}/join-requests/${requestId}/reject`,
-        {
-            method: "POST",
-            headers: authHeaders(),
-        }
+        { method: "POST", headers: authHeaders() }
     );
     if (!response.ok) {
         const err = await parseBackendError(response);
         throw new Error(err);
     }
+}
+
+// ─── NEW: Crew Insights ───────────────────────────────────────────────────────
+
+/**
+ * GET /trips/{tripId}/crew-insights
+ * Returns group dynamics and crew insights for a specific trip.
+ * @param {number} tripId
+ * @returns {Promise<{
+ *   groupSize: number, targetGroupSize: number, spotsLeft: number,
+ *   dominantBudget: string, dominantPlanningStyle: string, dominantSocialBattery: string,
+ *   topLanguages: {name:string, count:number}[],
+ *   topActivities: {name:string, count:number}[],
+ *   groupVibe: string,
+ *   insights: string[]
+ * }>}
+ */
+export async function getCrewInsights(tripId) {
+    const response = await fetch(`${BASE_URL}/trips/${tripId}/crew-insights`, {
+        method: "GET",
+        headers: authHeaders(),
+    });
+    if (!response.ok) {
+        const err = await parseBackendError(response);
+        throw new Error(err);
+    }
+    return response.json();
 }

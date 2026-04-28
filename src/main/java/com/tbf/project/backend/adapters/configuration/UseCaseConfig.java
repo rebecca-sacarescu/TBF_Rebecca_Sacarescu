@@ -1,16 +1,12 @@
 package com.tbf.project.backend.adapters.configuration;
 
-import com.tbf.project.backend.application.service.CompatibilityExplanationService;
-import com.tbf.project.backend.application.service.CompatibilityPenaltyCalculator;
-import com.tbf.project.backend.application.service.DirectionalProfileSimilarityCalculator;
-import com.tbf.project.backend.application.service.ProfileVectorizer;
-import com.tbf.project.backend.application.service.ReciprocalCompatibilityCalculator;
+import com.tbf.project.backend.application.service.*;
 import com.tbf.project.backend.application.usecases.*;
 import com.tbf.project.backend.application.usecases.impl.*;
 import com.tbf.project.backend.entities.gateway.*;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-
+import com.tbf.project.backend.application.mapper.TripChatMessageMapper;
 @Configuration
 public class UseCaseConfig {
 
@@ -20,11 +16,7 @@ public class UseCaseConfig {
             PasswordEncoderGateway passwordEncoderGateway,
             TokenGateway tokenGateway
     ) {
-        return new RegisterUseCaseImpl(
-                userGateway,
-                passwordEncoderGateway,
-                tokenGateway
-        );
+        return new RegisterUseCaseImpl(userGateway, passwordEncoderGateway, tokenGateway);
     }
 
     @Bean
@@ -33,11 +25,7 @@ public class UseCaseConfig {
             PasswordEncoderGateway passwordEncoderGateway,
             TokenGateway tokenGateway
     ) {
-        return new LoginUseCaseImpl(
-                userGateway,
-                passwordEncoderGateway,
-                tokenGateway
-        );
+        return new LoginUseCaseImpl(userGateway, passwordEncoderGateway, tokenGateway);
     }
 
     @Bean
@@ -243,12 +231,32 @@ public class UseCaseConfig {
     public CreateTripUseCase createTripUseCase(
             TripGateway tripGateway,
             TripMemberGateway tripMemberGateway,
-            ProfileGateway profileGateway
+            ProfileGateway profileGateway,
+            TripCardEnrichmentService tripCardEnrichmentService
     ) {
         return new CreateTripUseCaseImpl(
                 tripGateway,
                 tripMemberGateway,
-                profileGateway
+                profileGateway,
+                tripCardEnrichmentService
+        );
+    }
+
+    @Bean
+    public TripCountdownService tripCountdownService() {
+        return new TripCountdownService();
+    }
+
+    @Bean
+    public TripCardEnrichmentService tripCardEnrichmentService(
+            TripMemberGateway tripMemberGateway,
+            ProfileGateway profileGateway,
+            TripCountdownService tripCountdownService
+    ) {
+        return new TripCardEnrichmentService(
+                tripMemberGateway,
+                profileGateway,
+                tripCountdownService
         );
     }
 
@@ -257,13 +265,15 @@ public class UseCaseConfig {
             TripGateway tripGateway,
             TripMemberGateway tripMemberGateway,
             TripJoinRequestGateway tripJoinRequestGateway,
-            ProfileGateway profileGateway
+            ProfileGateway profileGateway,
+            TripCardEnrichmentService tripCardEnrichmentService
     ) {
         return new GetJoinableTripsUseCaseImpl(
                 tripGateway,
                 tripMemberGateway,
                 tripJoinRequestGateway,
-                profileGateway
+                profileGateway,
+                tripCardEnrichmentService
         );
     }
 
@@ -286,12 +296,14 @@ public class UseCaseConfig {
     public GetMyCreatedTripsUseCase getMyCreatedTripsUseCase(
             TripGateway tripGateway,
             TripMemberGateway tripMemberGateway,
-            ProfileGateway profileGateway
+            ProfileGateway profileGateway,
+            TripCardEnrichmentService tripCardEnrichmentService
     ) {
         return new GetMyCreatedTripsUseCaseImpl(
                 tripGateway,
                 tripMemberGateway,
-                profileGateway
+                profileGateway,
+                tripCardEnrichmentService
         );
     }
 
@@ -299,12 +311,14 @@ public class UseCaseConfig {
     public GetMyJoinedTripsUseCase getMyJoinedTripsUseCase(
             TripGateway tripGateway,
             TripMemberGateway tripMemberGateway,
-            ProfileGateway profileGateway
+            ProfileGateway profileGateway,
+            TripCardEnrichmentService tripCardEnrichmentService
     ) {
         return new GetMyJoinedTripsUseCaseImpl(
                 tripGateway,
                 tripMemberGateway,
-                profileGateway
+                profileGateway,
+                tripCardEnrichmentService
         );
     }
 
@@ -342,6 +356,63 @@ public class UseCaseConfig {
         return new RejectTripJoinRequestUseCaseImpl(
                 tripGateway,
                 tripJoinRequestGateway
+        );
+    }
+
+    @Bean
+    public GetTripCrewInsightsUseCase getTripCrewInsightsUseCase(
+            TripGateway tripGateway,
+            TripMemberGateway tripMemberGateway,
+            ProfileGateway profileGateway
+    ) {
+        return new GetTripCrewInsightsUseCaseImpl(
+                tripGateway,
+                tripMemberGateway,
+                profileGateway
+        );
+    }
+
+    @Bean
+    public ExpireTripsUseCase expireTripsUseCase(TripGateway tripGateway) {
+        return new ExpireTripsUseCaseImpl(tripGateway);
+    }
+
+    @Bean
+    public TripChatMessageMapper tripChatMessageMapper() {
+        return new TripChatMessageMapper();
+    }
+
+    @Bean
+    public SendTripChatMessageUseCase sendTripChatMessageUseCase(
+            TripGateway tripGateway,
+            TripMemberGateway tripMemberGateway,
+            TripChatMessageGateway tripChatMessageGateway,
+            ProfileGateway profileGateway,
+            TripChatMessageMapper tripChatMessageMapper
+    ) {
+        return new SendTripChatMessageUseCaseImpl(
+                tripGateway,
+                tripMemberGateway,
+                tripChatMessageGateway,
+                profileGateway,
+                tripChatMessageMapper
+        );
+    }
+
+    @Bean
+    public GetTripChatMessagesUseCase getTripChatMessagesUseCase(
+            TripGateway tripGateway,
+            TripMemberGateway tripMemberGateway,
+            TripChatMessageGateway tripChatMessageGateway,
+            ProfileGateway profileGateway,
+            TripChatMessageMapper tripChatMessageMapper
+    ) {
+        return new GetTripChatMessagesUseCaseImpl(
+                tripGateway,
+                tripMemberGateway,
+                tripChatMessageGateway,
+                profileGateway,
+                tripChatMessageMapper
         );
     }
 }

@@ -13,11 +13,16 @@ public interface TripJpaRepository extends JpaRepository<TripJpaEntity, Long> {
 
     List<TripJpaEntity> findAllByOwnerUserId(Long ownerUserId);
 
-    List<TripJpaEntity> findAllByStatusAndStartDateGreaterThanEqualAndOwnerUserIdNot(
+    List<TripJpaEntity> findAllByStatusAndEndDateGreaterThanEqualAndOwnerUserIdNot(
             TripStatus status,
-            LocalDate startDate,
+            LocalDate today,
             Long ownerUserId
     );
 
     List<TripJpaEntity> findAllByIdIn(List<Long> ids);
+
+    List<TripJpaEntity> findByEndDateBeforeAndStatusIn(
+            LocalDate today,
+            List<TripStatus> statuses
+    );
 }

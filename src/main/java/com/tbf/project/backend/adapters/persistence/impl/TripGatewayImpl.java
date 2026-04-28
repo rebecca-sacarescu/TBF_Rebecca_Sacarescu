@@ -53,16 +53,17 @@ public class TripGatewayImpl implements TripGateway {
     }
 
     @Override
-    public List<Trip> findAllByStatusAndStartDateGreaterThanEqualAndOwnerUserIdNot(
+    public List<Trip> findAllByStatusAndEndDateGreaterThanEqualAndOwnerUserIdNot(
             TripStatus status,
-            LocalDate startDate,
+            LocalDate today,
             Long ownerUserId
     ) {
-        return repository.findAllByStatusAndStartDateGreaterThanEqualAndOwnerUserIdNot(
+        return repository.findAllByStatusAndEndDateGreaterThanEqualAndOwnerUserIdNot(
                         status,
-                        startDate,
+                        today,
                         ownerUserId
-                ).stream()
+                )
+                .stream()
                 .map(this::toDomain)
                 .toList();
     }
@@ -74,6 +75,17 @@ public class TripGatewayImpl implements TripGateway {
         }
 
         return repository.findAllByIdIn(tripIds).stream()
+                .map(this::toDomain)
+                .toList();
+    }
+
+    @Override
+    public List<Trip> findTripsToExpire(LocalDate today) {
+        return repository.findByEndDateBeforeAndStatusIn(
+                        today,
+                        List.of(TripStatus.OPEN, TripStatus.FULL)
+                )
+                .stream()
                 .map(this::toDomain)
                 .toList();
     }

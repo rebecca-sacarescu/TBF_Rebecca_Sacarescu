@@ -15,11 +15,13 @@ public interface TripGateway {
 
     List<Trip> findAllByOwnerUserId(Long ownerUserId);
 
-    List<Trip> findAllByStatusAndStartDateGreaterThanEqualAndOwnerUserIdNot(
+    List<Trip> findAllByStatusAndEndDateGreaterThanEqualAndOwnerUserIdNot(
             TripStatus status,
-            LocalDate startDate,
+            LocalDate today,
             Long ownerUserId
     );
 
     List<Trip> findAllByIds(List<Long> tripIds);
+
+    List<Trip> findTripsToExpire(LocalDate today);
 }
