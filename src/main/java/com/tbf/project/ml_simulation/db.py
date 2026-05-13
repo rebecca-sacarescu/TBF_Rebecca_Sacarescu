@@ -1,5 +1,4 @@
 import psycopg2
-import pandas as pd
 from config import DB_CONFIG
 
 
@@ -7,8 +6,19 @@ def get_connection():
     return psycopg2.connect(**DB_CONFIG)
 
 
+def make_json_safe(value):
+    if value is None:
+        return None
+    if hasattr(value, "isoformat"):
+        return value.isoformat()
+    if isinstance(value, (int, float, bool, str)):
+        return value
+    return str(value)
+
+
 def list_actor_ids(limit=None):
     conn = get_connection()
+    cursor = conn.cursor()
 
     sql = """
         SELECT user_id
@@ -17,77 +27,117 @@ def list_actor_ids(limit=None):
     """
 
     if limit is not None:
-        sql += f" LIMIT {int(limit)}"
+        sql += " LIMIT %s"
+        cursor.execute(sql, (int(limit),))
+    else:
+        cursor.execute(sql)
 
-    df = pd.read_sql(sql, conn)
+    rows = cursor.fetchall()
+
+    cursor.close()
     conn.close()
 
-    return df["user_id"].tolist()
+    return [int(row[0]) for row in rows]
 
 
 def get_profile(user_id):
     conn = get_connection()
+    cursor = conn.cursor()
 
-    profile_sql = """
+    cursor.execute(
+        """
         SELECT 
-            up.user_id,
-            up.full_name,
-            up.birth_date,
-            up.gender,
-            up.origin_country,
-            up.origin_city,
-            up.current_location,
-            up.bio,
-            up.social_battery,
-            up.planning_style,
-            up.budget
-        FROM user_profiles up
-        WHERE up.user_id = %s
-    """
+            user_id,
+            full_name,
+            birth_date,
+            gender,
+            origin_country,
+            origin_city,
+            current_location,
+            bio,
+            social_battery,
+            planning_style,
+            budget
+        FROM user_profiles
+        WHERE user_id = %s
+        """,
+        (int(user_id),)
+    )
 
-    attrs_sql = """
+    row = cursor.fetchone()
+
+    if row is None:
+        cursor.close()
+        conn.close()
+        return None
+
+    columns = [
+        "user_id",
+        "full_name",
+        "birth_date",
+        "gender",
+        "origin_country",
+        "origin_city",
+        "current_location",
+        "bio",
+        "social_battery",
+        "planning_style",
+        "budget"
+    ]
+
+    profile = {
+        column: make_json_safe(value)
+        for column, value in zip(columns, row)
+    }
+
+    cursor.execute(
+        """
         SELECT 
             pa.category,
             pa.attribute_value
         FROM profile_attributes pa
         JOIN user_profiles up ON up.id = pa.profile_id
         WHERE up.user_id = %s
-    """
-
-    profile_df = pd.read_sql(profile_sql, conn, params=(user_id,))
-    attrs_df = pd.read_sql(attrs_sql, conn, params=(user_id,))
-    conn.close()
-
-    if profile_df.empty:
-        return None
-
-    profile = profile_df.iloc[0].to_dict()
+        ORDER BY pa.category, pa.attribute_value
+        """,
+        (int(user_id),)
+    )
 
     attributes = {}
-    for _, row in attrs_df.iterrows():
-        category = row["category"]
-        value = row["attribute_value"]
+
+    for category, attribute_value in cursor.fetchall():
+        category = str(category)
+        attribute_value = str(attribute_value)
 
         attributes.setdefault(category, [])
-        attributes[category].append(value)
+        attributes[category].append(attribute_value)
 
     profile["attributes"] = attributes
+
+    cursor.close()
+    conn.close()
 
     return profile
 
 
 def list_candidates(actor_user_id, limit=20):
     conn = get_connection()
+    cursor = conn.cursor()
 
-    sql = """
+    cursor.execute(
+        """
         SELECT up.user_id
         FROM user_profiles up
         WHERE up.user_id <> %s
         ORDER BY random()
         LIMIT %s
-    """
+        """,
+        (int(actor_user_id), int(limit))
+    )
 
-    df = pd.read_sql(sql, conn, params=(actor_user_id, limit))
+    rows = cursor.fetchall()
+
+    cursor.close()
     conn.close()
 
-    return df["user_id"].tolist()
+    return [int(row[0]) for row in rows]
