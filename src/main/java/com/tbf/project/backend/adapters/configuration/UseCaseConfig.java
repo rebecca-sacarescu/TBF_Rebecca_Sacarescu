@@ -1,5 +1,6 @@
 package com.tbf.project.backend.adapters.configuration;
 
+import com.tbf.project.backend.application.mapper.AiTripPlanMapper;
 import com.tbf.project.backend.application.service.*;
 import com.tbf.project.backend.application.usecases.*;
 import com.tbf.project.backend.application.usecases.impl.*;
@@ -413,6 +414,46 @@ public class UseCaseConfig {
                 tripChatMessageGateway,
                 profileGateway,
                 tripChatMessageMapper
+        );
+    }
+    @Bean
+    public AiTripPlanMapper aiTripPlanMapper() {
+        return new AiTripPlanMapper();
+    }
+
+    @Bean
+    public GenerateTripPlanUseCase generateTripPlanUseCase(
+            TripGateway tripGateway,
+            TripMemberGateway tripMemberGateway,
+            ProfileGateway profileGateway,
+            AiTripPlanGateway aiTripPlanGateway,
+            AiPlannerGateway aiPlannerGateway,
+            AiTripPlanMapper aiTripPlanMapper
+    ) {
+        return new GenerateTripPlanUseCaseImpl(
+                tripGateway,
+                tripMemberGateway,
+                profileGateway,
+                aiTripPlanGateway,
+                aiPlannerGateway,
+                aiTripPlanMapper
+        );
+    }
+
+    @Bean
+    public GetTripPlanUseCase getTripPlanUseCase(
+            TripGateway tripGateway,
+            TripMemberGateway tripMemberGateway,
+            ProfileGateway profileGateway,
+            AiTripPlanGateway aiTripPlanGateway,
+            AiTripPlanMapper aiTripPlanMapper
+    ) {
+        return new GetTripPlanUseCaseImpl(
+                tripGateway,
+                tripMemberGateway,
+                profileGateway,
+                aiTripPlanGateway,
+                aiTripPlanMapper
         );
     }
 }

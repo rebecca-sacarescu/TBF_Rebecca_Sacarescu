@@ -1,11 +1,18 @@
 // TripRoomPage.jsx
-// UPDATED: Added TripChatPanel section below CrewInsights.
-// All existing code is identical. Only addition: import TripChatPanel + chat section.
+// UPDATED: Added AiTripPlanPanel below TripChatPanel.
+// Added WebSocket subscription for /topic/trips/{tripId}/ai-plan
+// to receive real-time plan notifications from other crew members.
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { getMyCreatedTrips, getMyJoinedTrips } from "../services/tripsApi";
 import CrewInsights from "../components/CrewInsights";
 import TripChatPanel from "../components/TripChatPanel";
+import AiTripPlanPanel from "../components/AiTripPlanPanel";
+import TokenService from "../services/tokenService";
+
+// SockJS + STOMP — same libs already used by TripChatPanel
+// We reuse the existing WebSocket infrastructure pattern.
+import { connectTripChatSocket } from "../services/tripChatSocket";
 
 const C = {
     beigeLight: "#E9E3DE",
@@ -38,17 +45,13 @@ function getInitials(name = "") {
         .map((w) => w[0]?.toUpperCase() ?? "").join("");
 }
 
-/**
- * Determines if the chat should be read-only.
- * Read-only when: CLOSED, CANCELLED, EXPIRED, or endDate is in the past.
- */
 function isTripChatReadonly(trip) {
     if (!trip) return true;
     const nonActiveStatuses = ["CLOSED", "CANCELLED", "EXPIRED"];
     if (nonActiveStatuses.includes(trip.status)) return true;
     if (trip.endDate) {
         const end = new Date(trip.endDate);
-        end.setHours(23, 59, 59, 999); // end of the day
+        end.setHours(23, 59, 59, 999);
         if (end < new Date()) return true;
     }
     return false;
@@ -181,6 +184,12 @@ export default function TripRoomPage({ onNavigate, initialTripId, onViewProfile,
     const [error,        setError]        = useState(null);
     const [selectedTrip, setSelectedTrip] = useState(null);
 
+    // Holds a plan object pushed via WebSocket when another member regenerates
+    const [externalPlan, setExternalPlan] = useState(null);
+
+    // WebSocket ref for AI plan topic subscription
+    const aiPlanSocketRef = useRef(null);
+
     useEffect(() => {
         let cancelled = false;
         setLoading(true); setError(null);
@@ -201,6 +210,44 @@ export default function TripRoomPage({ onNavigate, initialTripId, onViewProfile,
 
         return () => { cancelled = true; };
     }, [initialTripId]);
+
+    // ── Subscribe to AI plan WebSocket topic when trip changes ──────────────
+    useEffect(() => {
+        if (!selectedTrip?.tripId) return;
+
+        const token = TokenService.getToken();
+        if (!token) return;
+
+        // Reset external plan when switching trips
+        setExternalPlan(null);
+
+        // Connect to /topic/trips/{tripId}/ai-plan
+        // We reuse the tripChatSocket pattern but subscribe to a different topic.
+        // connectTripChatSocket already sets up SockJS + STOMP; we hijack its
+        // onMessage for the AI plan topic by passing a custom topic override.
+        // If your tripChatSocket does not support topic override, use the
+        // pattern below with a direct STOMP subscription instead.
+        const { disconnect } = connectTripChatSocket({
+            tripId:    selectedTrip.tripId,
+            token,
+            topic:     `/topic/trips/${selectedTrip.tripId}/ai-plan`,
+            onMessage: (notification) => {
+                // notification = { tripId, message, plan }
+                if (notification?.plan) {
+                    setExternalPlan(notification);
+                }
+            },
+            onConnect: () => {},
+            onError:   () => {},
+        });
+
+        aiPlanSocketRef.current = { disconnect };
+
+        return () => {
+            disconnect?.();
+            aiPlanSocketRef.current = null;
+        };
+    }, [selectedTrip?.tripId]);
 
     const trip = selectedTrip;
 
@@ -339,11 +386,7 @@ export default function TripRoomPage({ onNavigate, initialTripId, onViewProfile,
                         {trip.memberPreview?.length > 0 ? (
                             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(120px, 1fr))", gap: "12px" }}>
                                 {trip.memberPreview.map((member, i) => (
-                                    <MemberCard
-                                        key={member.userId ?? i}
-                                        member={member}
-                                        onViewProfile={onViewProfile}
-                                    />
+                                    <MemberCard key={member.userId ?? i} member={member} onViewProfile={onViewProfile} />
                                 ))}
                                 {trip.spotsLeft > 0 && Array.from({ length: Math.min(trip.spotsLeft, 4) }).map((_, i) => (
                                     <div key={`empty-${i}`} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "10px", padding: "18px 14px", borderRadius: "16px", background: C.beigeMid, border: `1.5px dashed ${C.tanBorder}` }}>
@@ -363,6 +406,15 @@ export default function TripRoomPage({ onNavigate, initialTripId, onViewProfile,
 
                     {/* ── Crew Insights ──────────────────────────────────────── */}
                     <CrewInsights tripId={trip.tripId} />
+
+                    {/* ── AI Trip Planner ────────────────────────────────────── */}
+                    <AiTripPlanPanel
+                        key={trip.tripId}
+                        tripId={trip.tripId}
+                        destinationCity={trip.destinationCity}
+                        destinationCountry={trip.destinationCountry}
+                        externalPlan={externalPlan}
+                    />
 
                     {/* ── Trip Room Chat ─────────────────────────────────────── */}
                     <TripChatPanel

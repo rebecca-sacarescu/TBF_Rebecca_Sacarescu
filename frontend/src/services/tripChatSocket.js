@@ -1,89 +1,114 @@
-import { Client } from "@stomp/stompjs";
-import SockJS from "sockjs-client";
+/**
+ * tripChatSocket.js
+ *
+ * Connects to the Spring WebSocket (SockJS + STOMP) endpoint.
+ * Used by both TripChatPanel (chat messages) and TripRoomPage (AI plan notifications).
+ *
+ * The `topic` prop is optional. If not provided, defaults to the chat topic:
+ *   /topic/trips/{tripId}/chat
+ *
+ * For AI plan notifications, pass:
+ *   topic: `/topic/trips/${tripId}/ai-plan`
+ *
+ * sendMessage is only relevant for the chat topic. For the AI plan topic,
+ * only onMessage (read) is used.
+ */
 
-const BASE_URL = import.meta.env.VITE_API_BASE_URL;
+const BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8080";
 
 /**
- * Connects to the trip group chat WebSocket using STOMP over SockJS.
- *
- * JWT is passed as a query param (?token=...) because SockJS does not
- * support custom headers during the HTTP upgrade handshake.
- *
  * @param {{
  *   tripId:    number,
  *   token:     string,
- *   onMessage: (msg: object) => void,
- *   onConnect: () => void,
- *   onError:   (err: any) => void,
+ *   topic?:    string,           — override subscription topic
+ *   onMessage: (data: any) => void,
+ *   onConnect?: () => void,
+ *   onError?:   () => void,
  * }} options
- *
- * @returns {{
- *   sendMessage: (content: string) => void,
- *   disconnect:  () => void,
- * }}
+ * @returns {{ sendMessage: (content: string) => void, disconnect: () => void }}
  */
-export function connectTripChatSocket({ tripId, token, onMessage, onConnect, onError }) {
-    // Encode token to be safe in a query param
-    const wsUrl = `${BASE_URL}/ws?token=${encodeURIComponent(token)}`;
+export function connectTripChatSocket({
+                                          tripId,
+                                          token,
+                                          topic,
+                                          onMessage,
+                                          onConnect,
+                                          onError,
+                                      }) {
+    let stompClient = null;
+    let subscription = null;
 
-    const client = new Client({
-        // SockJS factory — called by stompjs when (re)connecting
-        webSocketFactory: () => new SockJS(wsUrl),
+    const subscriptionTopic = topic ?? `/topic/trips/${tripId}/chat`;
+    const sendDestination   = `/app/trips/${tripId}/chat/send`;
 
-        // Reconnect automatically after 5 s on unexpected disconnect
-        reconnectDelay: 5000,
+    // Lazy-load SockJS and STOMP from CDN if not bundled.
+    // These are already available via spring-boot-starter-websocket's SockJS client.
+    // In Vite, install: npm install sockjs-client @stomp/stompjs
+    let SockJS;
+    let Stomp;
 
-        onConnect: () => {
-            // Subscribe to the trip-scoped broadcast topic
-            client.subscribe(`/topic/trips/${tripId}/chat`, (frame) => {
-                try {
-                    const msg = JSON.parse(frame.body);
-                    onMessage?.(msg);
-                } catch {
-                    // Malformed frame — ignore silently
-                }
-            });
-            onConnect?.();
-        },
+    async function init() {
+        try {
+            // Dynamic import — works if installed as npm packages
+            const sockjsMod = await import("sockjs-client");
+            const stompMod  = await import("@stomp/stompjs");
+            SockJS = sockjsMod.default;
+            Stomp  = stompMod.Client;
+        } catch {
+            // Fallback: assume globals are available (CDN)
+            SockJS = window.SockJS;
+            Stomp  = window.StompJs?.Client;
+        }
 
-        onDisconnect: () => {
-            // Stompjs handles reconnect via reconnectDelay;
-            // surface the event so the UI can show "reconnecting…"
-            onError?.({ type: "disconnect" });
-        },
+        if (!SockJS || !Stomp) {
+            console.error("[tripChatSocket] SockJS or STOMP not available.");
+            onError?.();
+            return;
+        }
 
-        onStompError: (frame) => {
-            onError?.({ type: "stomp", frame });
-        },
-
-        onWebSocketError: (event) => {
-            onError?.({ type: "websocket", event });
-        },
-    });
-
-    client.activate();
-
-    /**
-     * Sends a chat message to the server destination.
-     * Content is validated on the backend as well, but we guard here too.
-     * @param {string} content
-     */
-    function sendMessage(content) {
-        if (!client.connected) return;
-        if (!content || !content.trim()) return;
-
-        client.publish({
-            destination: `/app/trips/${tripId}/chat/send`,
-            body: JSON.stringify({ content: content.trim() }),
+        stompClient = new Stomp({
+            webSocketFactory: () => new SockJS(`${BASE_URL}/ws?token=${encodeURIComponent(token)}`),
+            connectHeaders: {
+                Authorization: `Bearer ${token}`,
+            },
+            reconnectDelay: 5000,
+            onConnect: () => {
+                subscription = stompClient.subscribe(subscriptionTopic, (frame) => {
+                    try {
+                        const data = JSON.parse(frame.body);
+                        onMessage(data);
+                    } catch {
+                        // non-JSON frame — ignore
+                    }
+                });
+                onConnect?.();
+            },
+            onStompError: () => {
+                onError?.();
+            },
+            onWebSocketError: () => {
+                onError?.();
+            },
         });
+
+        stompClient.activate();
     }
 
-    /**
-     * Gracefully closes the STOMP session and underlying SockJS connection.
-     */
-    function disconnect() {
-        client.deactivate();
-    }
+    init();
 
-    return { sendMessage, disconnect };
+    return {
+        sendMessage: (content) => {
+            if (!stompClient?.connected) return;
+            stompClient.publish({
+                destination: sendDestination,
+                body: JSON.stringify({ content }),
+            });
+        },
+        disconnect: () => {
+            subscription?.unsubscribe();
+            stompClient?.deactivate();
+            stompClient  = null;
+            subscription = null;
+        },
+    };
 }
