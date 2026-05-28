@@ -1,17 +1,12 @@
-// TripRoomPage.jsx
-// UPDATED: Added AiTripPlanPanel below TripChatPanel.
-// Added WebSocket subscription for /topic/trips/{tripId}/ai-plan
-// to receive real-time plan notifications from other crew members.
-
 import { useState, useEffect, useRef } from "react";
 import { getMyCreatedTrips, getMyJoinedTrips } from "../services/tripsApi";
 import CrewInsights from "../components/CrewInsights";
+import CrewCompatibilityPanel from "../components/CrewCompatibilityPanel";
 import TripChatPanel from "../components/TripChatPanel";
 import AiTripPlanPanel from "../components/AiTripPlanPanel";
+import WeatherWidget from "../components/WeatherWidget";
+import DiscoverPlaces from "../components/DiscoverPlaces";
 import TokenService from "../services/tokenService";
-
-// SockJS + STOMP — same libs already used by TripChatPanel
-// We reuse the existing WebSocket infrastructure pattern.
 import { connectTripChatSocket } from "../services/tripChatSocket";
 
 const C = {
@@ -57,8 +52,6 @@ function isTripChatReadonly(trip) {
     return false;
 }
 
-// ─── Spinner ──────────────────────────────────────────────────────────────────
-
 function Spinner({ label = "Loading..." }) {
     return (
         <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "14px", padding: "80px 0", fontFamily: SANS }}>
@@ -68,8 +61,6 @@ function Spinner({ label = "Loading..." }) {
         </div>
     );
 }
-
-// ─── Member card ──────────────────────────────────────────────────────────────
 
 function MemberCard({ member, onViewProfile }) {
     const { fullName = "", profilePictureUrl, role, userId } = member;
@@ -145,8 +136,6 @@ function MemberCard({ member, onViewProfile }) {
     );
 }
 
-// ─── Trip selector pill ───────────────────────────────────────────────────────
-
 function TripPill({ trip, isSelected, onClick }) {
     return (
         <button onClick={onClick}
@@ -173,21 +162,12 @@ function TripPill({ trip, isSelected, onClick }) {
     );
 }
 
-// ─── TripRoomPage ─────────────────────────────────────────────────────────────
-
-/**
- * @param {{ onNavigate: (page:string)=>void, initialTripId?: number, onViewProfile?: (userId:number)=>void, currentUserId?: number|null }} props
- */
 export default function TripRoomPage({ onNavigate, initialTripId, onViewProfile, currentUserId = null }) {
     const [allTrips,     setAllTrips]     = useState([]);
     const [loading,      setLoading]      = useState(true);
     const [error,        setError]        = useState(null);
     const [selectedTrip, setSelectedTrip] = useState(null);
-
-    // Holds a plan object pushed via WebSocket when another member regenerates
     const [externalPlan, setExternalPlan] = useState(null);
-
-    // WebSocket ref for AI plan topic subscription
     const aiPlanSocketRef = useRef(null);
 
     useEffect(() => {
@@ -211,31 +191,19 @@ export default function TripRoomPage({ onNavigate, initialTripId, onViewProfile,
         return () => { cancelled = true; };
     }, [initialTripId]);
 
-    // ── Subscribe to AI plan WebSocket topic when trip changes ──────────────
     useEffect(() => {
         if (!selectedTrip?.tripId) return;
-
         const token = TokenService.getToken();
         if (!token) return;
 
-        // Reset external plan when switching trips
         setExternalPlan(null);
 
-        // Connect to /topic/trips/{tripId}/ai-plan
-        // We reuse the tripChatSocket pattern but subscribe to a different topic.
-        // connectTripChatSocket already sets up SockJS + STOMP; we hijack its
-        // onMessage for the AI plan topic by passing a custom topic override.
-        // If your tripChatSocket does not support topic override, use the
-        // pattern below with a direct STOMP subscription instead.
         const { disconnect } = connectTripChatSocket({
             tripId:    selectedTrip.tripId,
             token,
             topic:     `/topic/trips/${selectedTrip.tripId}/ai-plan`,
             onMessage: (notification) => {
-                // notification = { tripId, message, plan }
-                if (notification?.plan) {
-                    setExternalPlan(notification);
-                }
+                if (notification?.plan) setExternalPlan(notification);
             },
             onConnect: () => {},
             onError:   () => {},
@@ -291,7 +259,6 @@ export default function TripRoomPage({ onNavigate, initialTripId, onViewProfile,
     return (
         <div style={{ display: "flex", flexDirection: "column", gap: "20px", paddingBottom: "40px", fontFamily: SANS }}>
 
-            {/* ── Trip selector ──────────────────────────────────────────── */}
             <div style={{ display: "flex", gap: "10px", overflowX: "auto", paddingBottom: "4px" }}>
                 {allTrips.map((t) => (
                     <TripPill key={t.tripId} trip={t} isSelected={selectedTrip?.tripId === t.tripId} onClick={() => setSelectedTrip(t)} />
@@ -300,7 +267,6 @@ export default function TripRoomPage({ onNavigate, initialTripId, onViewProfile,
 
             {trip && (
                 <>
-                    {/* ── Hero header ────────────────────────────────────────── */}
                     <section style={{ background: C.white, borderRadius: "20px", border: `1px solid ${C.tanBorder}`, boxShadow: `0 4px 0 #bfb9b4, 0 8px 28px rgba(165,147,123,0.10)`, overflow: "hidden" }}>
                         <div style={{ height: "120px", background: `linear-gradient(135deg, ${C.grayWarm} 0%, #575353 40%, #4d4949 100%)`, position: "relative", overflow: "hidden" }}>
                             <div style={{ position: "absolute", inset: 0, background: `linear-gradient(to bottom, transparent 40%, rgba(58,55,55,0.55) 100%)` }} />
@@ -374,7 +340,6 @@ export default function TripRoomPage({ onNavigate, initialTripId, onViewProfile,
                         )}
                     </section>
 
-                    {/* ── Crew members ───────────────────────────────────────── */}
                     <section style={{ background: C.white, borderRadius: "20px", border: `1px solid ${C.tanBorder}`, boxShadow: `0 4px 0 #bfb9b4, 0 8px 28px rgba(165,147,123,0.10)`, padding: "24px 28px" }}>
                         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "18px" }}>
                             <h2 style={{ fontFamily: SERIF, fontSize: "20px", color: C.grayWarm, margin: 0, letterSpacing: "-0.01em" }}>Your Crew</h2>
@@ -404,10 +369,21 @@ export default function TripRoomPage({ onNavigate, initialTripId, onViewProfile,
                         )}
                     </section>
 
-                    {/* ── Crew Insights ──────────────────────────────────────── */}
                     <CrewInsights tripId={trip.tripId} />
 
-                    {/* ── AI Trip Planner ────────────────────────────────────── */}
+                    <CrewCompatibilityPanel tripId={trip.tripId} />
+
+                    <WeatherWidget
+                        destinationCity={trip.destinationCity}
+                        destinationCountry={trip.destinationCountry}
+                    />
+
+                    <DiscoverPlaces
+                        city={trip.destinationCity}
+                        country={trip.destinationCountry}
+                        tripType={trip.tripType}
+                    />
+
                     <AiTripPlanPanel
                         key={trip.tripId}
                         tripId={trip.tripId}
@@ -416,7 +392,6 @@ export default function TripRoomPage({ onNavigate, initialTripId, onViewProfile,
                         externalPlan={externalPlan}
                     />
 
-                    {/* ── Trip Room Chat ─────────────────────────────────────── */}
                     <TripChatPanel
                         tripId={trip.tripId}
                         tripTitle={trip.title}

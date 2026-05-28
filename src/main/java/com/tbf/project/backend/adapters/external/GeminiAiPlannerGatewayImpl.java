@@ -24,7 +24,7 @@ public class GeminiAiPlannerGatewayImpl implements AiPlannerGateway {
     private String apiKey;
 
     private final HttpClient httpClient = HttpClient.newBuilder()
-            .connectTimeout(Duration.ofSeconds(15))
+            .connectTimeout(Duration.ofSeconds(30))
             .build();
 
     private final ObjectMapper objectMapper = new ObjectMapper();
@@ -46,7 +46,7 @@ public class GeminiAiPlannerGatewayImpl implements AiPlannerGateway {
                     .uri(URI.create(GEMINI_URL + apiKey))
                     .header("Content-Type", "application/json")
                     .POST(HttpRequest.BodyPublishers.ofString(requestBody))
-                    .timeout(Duration.ofSeconds(30))
+                    .timeout(Duration.ofSeconds(90))
                     .build();
 
             HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
@@ -69,26 +69,17 @@ public class GeminiAiPlannerGatewayImpl implements AiPlannerGateway {
     }
 
     private String buildRequestBody(String prompt) throws Exception {
-        String escapedPrompt = objectMapper.writeValueAsString(prompt);
-        escapedPrompt = escapedPrompt.substring(1, escapedPrompt.length() - 1);
+        var root = objectMapper.createObjectNode();
+        var contentsArray = root.putArray("contents");
+        var contentNode = contentsArray.addObject();
+        var partsArray = contentNode.putArray("parts");
+        partsArray.addObject().put("text", prompt);
 
-        return """
-                {
-                  "contents": [
-                    {
-                      "parts": [
-                        {
-                          "text": "%s"
-                        }
-                      ]
-                    }
-                  ],
-                  "generationConfig": {
-                    "temperature": 0.7,
-                    "maxOutputTokens": 1500
-                  }
-                }
-                """.formatted(escapedPrompt);
+        var genConfig = root.putObject("generationConfig");
+        genConfig.put("temperature", 0.3);
+        genConfig.put("maxOutputTokens", 3000);
+
+        return objectMapper.writeValueAsString(root);
     }
 
     private String extractPlanJson(String geminiResponse) throws Exception {
@@ -103,6 +94,15 @@ public class GeminiAiPlannerGatewayImpl implements AiPlannerGateway {
                 .asText("");
 
         if (rawText.isBlank()) {
+            // Verifica daca Gemini a oprit generarea din cauza token limit
+            String finishReason = root
+                    .path("candidates")
+                    .path(0)
+                    .path("finishReason")
+                    .asText("");
+            if ("MAX_TOKENS".equals(finishReason)) {
+                throw new RuntimeException("Response truncated — increase maxOutputTokens");
+            }
             throw new RuntimeException("Gemini returned empty response");
         }
 
@@ -111,7 +111,11 @@ public class GeminiAiPlannerGatewayImpl implements AiPlannerGateway {
             cleaned = cleaned.replaceAll("^```[a-zA-Z]*\\n?", "").replaceAll("```$", "").trim();
         }
 
-        objectMapper.readTree(cleaned);
+        try {
+            objectMapper.readTree(cleaned);
+        } catch (Exception e) {
+            throw new RuntimeException("Gemini returned invalid or truncated JSON. Try again.", e);
+        }
 
         return cleaned;
     }

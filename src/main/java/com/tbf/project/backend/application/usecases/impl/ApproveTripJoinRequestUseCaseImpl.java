@@ -1,9 +1,7 @@
 package com.tbf.project.backend.application.usecases.impl;
 
 import com.tbf.project.backend.application.usecases.ApproveTripJoinRequestUseCase;
-import com.tbf.project.backend.entities.gateway.TripGateway;
-import com.tbf.project.backend.entities.gateway.TripJoinRequestGateway;
-import com.tbf.project.backend.entities.gateway.TripMemberGateway;
+import com.tbf.project.backend.entities.gateway.*;
 import com.tbf.project.backend.entities.model.Trip;
 import com.tbf.project.backend.entities.model.TripJoinRequest;
 import com.tbf.project.backend.entities.model.TripMember;
@@ -19,15 +17,21 @@ public class ApproveTripJoinRequestUseCaseImpl implements ApproveTripJoinRequest
     private final TripGateway tripGateway;
     private final TripJoinRequestGateway tripJoinRequestGateway;
     private final TripMemberGateway tripMemberGateway;
+    private final TripCrewCompatibilityGateway tripCrewCompatibilityGateway;
+    private final CrewCompatibilityCacheGateway crewCompatibilityCacheGateway;
 
     public ApproveTripJoinRequestUseCaseImpl(
             TripGateway tripGateway,
             TripJoinRequestGateway tripJoinRequestGateway,
-            TripMemberGateway tripMemberGateway
+            TripMemberGateway tripMemberGateway,
+            TripCrewCompatibilityGateway tripCrewCompatibilityGateway,
+            CrewCompatibilityCacheGateway crewCompatibilityCacheGateway
     ) {
         this.tripGateway = tripGateway;
         this.tripJoinRequestGateway = tripJoinRequestGateway;
         this.tripMemberGateway = tripMemberGateway;
+        this.tripCrewCompatibilityGateway = tripCrewCompatibilityGateway;
+        this.crewCompatibilityCacheGateway = crewCompatibilityCacheGateway;
     }
 
     @Override
@@ -77,6 +81,9 @@ public class ApproveTripJoinRequestUseCaseImpl implements ApproveTripJoinRequest
         request.setStatus(TripJoinRequestStatus.APPROVED);
         request.setResolvedAt(LocalDateTime.now());
         tripJoinRequestGateway.save(request);
+
+        tripCrewCompatibilityGateway.deleteByTripId(tripId);
+        crewCompatibilityCacheGateway.evictByTripId(tripId);
 
         long updatedMembers = tripMemberGateway.countActiveByTripId(tripId);
         if (updatedMembers >= trip.getTargetGroupSize()) {

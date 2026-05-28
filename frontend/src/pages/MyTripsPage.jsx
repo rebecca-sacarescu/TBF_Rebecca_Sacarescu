@@ -8,8 +8,7 @@ import {
     createTrip,
 } from "../services/tripsApi";
 import TripTicketCard from "../components/TripTicketCard";
-
-// ─── Spinner ──────────────────────────────────────────────────────────────────
+import DiscoverPlaces from "../components/DiscoverPlaces";
 
 function Spinner({ label = "Loading..." }) {
     return (
@@ -20,8 +19,6 @@ function Spinner({ label = "Loading..." }) {
         </div>
     );
 }
-
-// ─── Error state ──────────────────────────────────────────────────────────────
 
 function ErrorState({ message, onRetry }) {
     return (
@@ -37,8 +34,6 @@ function ErrorState({ message, onRetry }) {
         </div>
     );
 }
-
-// ─── Empty state ──────────────────────────────────────────────────────────────
 
 function EmptyState({ tab, onCreateTrip, onExplore }) {
     const isOwned = tab === "created";
@@ -78,8 +73,6 @@ function EmptyState({ tab, onCreateTrip, onExplore }) {
     );
 }
 
-// ─── Requester avatar ─────────────────────────────────────────────────────────
-
 function RequesterAvatar({ name = "", url }) {
     const initials = name.trim().split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0]?.toUpperCase() ?? "").join("");
     if (url) {
@@ -95,8 +88,6 @@ function RequesterAvatar({ name = "", url }) {
         </div>
     );
 }
-
-// ─── Single join request row ──────────────────────────────────────────────────
 
 function JoinRequestRow({ request, tripId, onApprove, onReject }) {
     const [loading, setLoading] = useState(null);
@@ -203,8 +194,6 @@ function JoinRequestRow({ request, tripId, onApprove, onReject }) {
     );
 }
 
-// ─── Manage Trip panel ────────────────────────────────────────────────────────
-
 function ManageTripPanel({ trip, onClose }) {
     const [requests, setRequests] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -262,8 +251,6 @@ function ManageTripPanel({ trip, onClose }) {
         </div>
     );
 }
-
-// ─── Create Trip Form ─────────────────────────────────────────────────────────
 
 const TRIP_TYPE_OPTIONS = [
     { value: "CITY_BREAK",    label: "City Break" },
@@ -325,24 +312,33 @@ function SectionNumber({ n }) {
 
 function CreateTripForm({ onSuccess, onCancel }) {
     const [form, setForm] = useState(INITIAL_FORM);
+    const [debouncedCity, setDebouncedCity] = useState("");
     const [errors, setErrors] = useState({});
     const [loading, setLoading] = useState(false);
     const [serverError, setServerError] = useState(null);
 
-    const set = (field, value) => { setForm((prev) => ({ ...prev, [field]: value })); setErrors((prev) => ({ ...prev, [field]: undefined })); };
+    useEffect(() => {
+        const t = setTimeout(() => setDebouncedCity(form.destinationCity), 500);
+        return () => clearTimeout(t);
+    }, [form.destinationCity]);
+
+    const set = (field, value) => {
+        setForm((prev) => ({ ...prev, [field]: value }));
+        setErrors((prev) => ({ ...prev, [field]: undefined }));
+    };
 
     const validate = () => {
         const e = {};
-        if (!form.title.trim())            e.title = "Title is required";
-        if (!form.destinationCity.trim())   e.destinationCity = "City is required";
+        if (!form.title.trim())             e.title = "Title is required";
+        if (!form.destinationCity.trim())    e.destinationCity = "City is required";
         if (!form.destinationCountry.trim()) e.destinationCountry = "Country is required";
-        if (!form.startDate)               e.startDate = "Start date is required";
-        if (!form.endDate)                 e.endDate = "End date is required";
+        if (!form.startDate)                e.startDate = "Start date is required";
+        if (!form.endDate)                  e.endDate = "End date is required";
         if (form.startDate && form.endDate && form.startDate >= form.endDate) e.endDate = "End date must be after start date";
-        if (!form.budget)                  e.budget = "Select a budget";
-        if (!form.tripType)                e.tripType = "Select a trip type";
-        if (!form.description.trim())      e.description = "Description is required";
-        if (form.targetGroupSize < 2)      e.targetGroupSize = "Minimum group size is 2";
+        if (!form.budget)                   e.budget = "Select a budget";
+        if (!form.tripType)                 e.tripType = "Select a trip type";
+        if (!form.description.trim())       e.description = "Description is required";
+        if (form.targetGroupSize < 2)       e.targetGroupSize = "Minimum group size is 2";
         return e;
     };
 
@@ -361,6 +357,7 @@ function CreateTripForm({ onSuccess, onCancel }) {
 
     return (
         <div className="space-y-8">
+
             {/* Section 1 — Destination */}
             <section>
                 <div className="flex items-center gap-3 mb-5">
@@ -370,6 +367,7 @@ function CreateTripForm({ onSuccess, onCancel }) {
                         <p className="font-label" style={{ fontSize: "10px", letterSpacing: "0.08em", color: "#A5937B" }}>Where are you going?</p>
                     </div>
                 </div>
+
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div className="md:col-span-3">
                         <FormLabel>Trip Title</FormLabel>
@@ -393,7 +391,20 @@ function CreateTripForm({ onSuccess, onCancel }) {
                         <FieldError msg={errors.destinationCountry} />
                     </div>
                 </div>
+
+                {/* DiscoverPlaces — in afara grid-ului, full width */}
+                {debouncedCity && debouncedCity.trim().length >= 2 && (
+                    <div style={{ marginTop: "16px", padding: "14px 16px", borderRadius: "14px", background: "#faf8f6", border: "1px solid rgba(165,147,123,0.22)" }}>
+                        <DiscoverPlaces
+                            city={debouncedCity}
+                            country={form.destinationCountry}
+                            tripType={form.tripType}
+                            compact={true}
+                        />
+                    </div>
+                )}
             </section>
+
             <div className="h-px opacity-50" style={{ background: "rgba(165,147,123,0.35)" }} />
 
             {/* Section 2 — Schedule */}
@@ -422,6 +433,7 @@ function CreateTripForm({ onSuccess, onCancel }) {
                     </div>
                 </div>
             </section>
+
             <div className="h-px opacity-50" style={{ background: "rgba(165,147,123,0.35)" }} />
 
             {/* Section 3 — Details */}
@@ -468,6 +480,7 @@ function CreateTripForm({ onSuccess, onCancel }) {
                     </div>
                 </div>
             </section>
+
             <div className="h-px opacity-50" style={{ background: "rgba(165,147,123,0.35)" }} />
 
             {/* Section 4 — Story */}
@@ -518,8 +531,6 @@ function CreateTripForm({ onSuccess, onCancel }) {
         </div>
     );
 }
-
-// ─── MyTripsPage ──────────────────────────────────────────────────────────────
 
 export default function MyTripsPage({ onNavigate, onOpenRoom }) {
     const [activeTab, setActiveTab] = useState("created");
@@ -573,7 +584,6 @@ export default function MyTripsPage({ onNavigate, onOpenRoom }) {
     return (
         <div className="space-y-8">
 
-            {/* ── Page header ─────────────────────────────────────────────── */}
             <section className="relative rounded-xl overflow-hidden" style={{ background: "#ffffff", border: "1px solid rgba(165,147,123,0.25)", boxShadow: "0 4px 0 #bfb9b4, 0 8px 28px rgba(165,147,123,0.10)" }}>
                 <div className="h-24 md:h-32 w-full relative overflow-hidden" style={{ background: "linear-gradient(135deg, #666161 0%, #575353 40%, #4d4949 100%)" }}>
                     <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 40%, rgba(58,55,55,0.55) 100%)" }} />
@@ -615,7 +625,6 @@ export default function MyTripsPage({ onNavigate, onOpenRoom }) {
                 </div>
             </section>
 
-            {/* ── Create Trip Form ──────────────────────────────────────────── */}
             {showCreateForm && (
                 <section className="rounded-xl overflow-hidden" style={{ background: "#ffffff", boxShadow: "0 4px 0 #bfb9b4, 0 8px 28px rgba(165,147,123,0.10)", border: "1px solid rgba(165,147,123,0.25)" }}>
                     <div className="px-6 md:px-8 py-5 flex items-center justify-between" style={{ borderBottom: "1px solid rgba(165,147,123,0.25)" }}>
@@ -638,7 +647,6 @@ export default function MyTripsPage({ onNavigate, onOpenRoom }) {
                 </section>
             )}
 
-            {/* ── Tabs ──────────────────────────────────────────────────────── */}
             <div className="flex gap-2 p-1 rounded-xl w-fit" style={{ background: "rgba(165,147,123,0.14)" }}>
                 {[
                     { key: "created", label: `Commanded${createdTrips.length > 0 ? ` (${createdTrips.length})` : ""}` },
@@ -658,7 +666,6 @@ export default function MyTripsPage({ onNavigate, onOpenRoom }) {
                 ))}
             </div>
 
-            {/* ── Trip list ─────────────────────────────────────────────────── */}
             {isLoading && <Spinner label="Loading your itineraries..." />}
             {!isLoading && currentError && <ErrorState message={currentError} onRetry={refetch} />}
             {!isLoading && !currentError && currentTrips.length === 0 && (
@@ -688,7 +695,6 @@ export default function MyTripsPage({ onNavigate, onOpenRoom }) {
                 </div>
             )}
 
-            {/* ── Explore CTA ───────────────────────────────────────────────── */}
             {!isLoading && !currentError && (
                 <div className="text-center pt-4 pb-8">
                     <button onClick={() => onNavigate?.("open-trips")}

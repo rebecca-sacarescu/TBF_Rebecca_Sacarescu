@@ -1,11 +1,7 @@
-// ─── TripTicketCard.jsx ───────────────────────────────────────────────────────
-// Shared boarding-pass style card used in both OpenTripsPage and MyTripsPage.
-// Zero external dependencies — all icons are inline SVG.
-
 import MemberPreview from "./MemberPreview";
 import CountdownBadge from "./CountdownBadge";
+import WeatherBadge from "./WeatherBadge";
 
-// ─── Design tokens ────────────────────────────────────────────────────────────
 const C = {
     beigeLight: "#E9E3DE",
     beigeMid:   "#faf8f6",
@@ -20,8 +16,6 @@ const C = {
 };
 const SERIF = "'DM Serif Display', serif";
 const SANS  = "'DM Sans', sans-serif";
-
-// ─── Helpers ──────────────────────────────────────────────────────────────────
 
 function gateFromId(tripId) {
     const letters = ["A", "B", "C", "D", "E", "F"];
@@ -59,8 +53,6 @@ function tripDuration(startDate, endDate) {
     } catch { return null; }
 }
 
-// ─── Enum maps ────────────────────────────────────────────────────────────────
-
 const TRIP_TYPE_LABELS = {
     CITY_BREAK:    "City Break",
     ROAD_TRIP:     "Road Trip",
@@ -75,8 +67,6 @@ const BUDGET_LABELS = {
     MODERATE:        "Moderate",
     LUXURY:          "Luxury",
 };
-
-// ─── Sub-components ───────────────────────────────────────────────────────────
 
 function OwnerAvatar({ name = "", url }) {
     const initials = name.trim().split(/\s+/).filter(Boolean).slice(0, 2)
@@ -119,8 +109,6 @@ function MetaCell({ label, value }) {
     );
 }
 
-// ─── TripTicketCard ───────────────────────────────────────────────────────────
-
 export default function TripTicketCard({
                                            trip,
                                            variant = "explore",
@@ -156,7 +144,6 @@ export default function TripTicketCard({
     const isFull    = status === "FULL" || spotsLeft === 0;
     const hasCrew   = memberPreview.length > 0;
 
-    // ── Type pill style ──────────────────────────────────────────────────────
     const typePillStyle = {
         display: "inline-flex", alignItems: "center",
         padding: "3px 10px", borderRadius: "6px",
@@ -167,7 +154,6 @@ export default function TripTicketCard({
         border: `1px solid rgba(165,147,123,0.28)`,
     };
 
-    // ── Status pill style ────────────────────────────────────────────────────
     const statusColors = {
         OPEN:      { bg: "rgba(165,147,123,0.14)", color: C.grayWarm, border: "rgba(165,147,123,0.30)" },
         FULL:      { bg: "rgba(58,55,55,0.10)",    color: C.grayWarm, border: "rgba(58,55,55,0.20)" },
@@ -200,10 +186,8 @@ export default function TripTicketCard({
                 e.currentTarget.style.transform = "translateY(0)";
             }}
         >
-            {/* Accent strip top */}
             <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: "2px", background: `linear-gradient(to right, ${C.grayWarm}, ${C.tan}, ${C.lavender})` }} />
 
-            {/* Pending requests badge */}
             {variant === "owned" && pendingRequestCount > 0 && (
                 <div style={{
                     position: "absolute", top: "-8px", right: "-8px", zIndex: 10,
@@ -221,10 +205,8 @@ export default function TripTicketCard({
                 </div>
             )}
 
-            {/* ── Main body ─────────────────────────────────────────────────── */}
             <div style={{ flex: 3, padding: "22px 24px 22px 26px", display: "flex", flexDirection: "column", gap: "14px", minWidth: 0 }}>
 
-                {/* Row 1: type pill + status + countdown */}
                 <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
                     <span style={typePillStyle}>
                         {TRIP_TYPE_LABELS[tripType] || tripType}
@@ -242,7 +224,6 @@ export default function TripTicketCard({
                     {countdown && <CountdownBadge countdown={countdown} />}
                 </div>
 
-                {/* Row 2: destination */}
                 <div>
                     <h3 style={{
                         fontFamily: SERIF,
@@ -262,7 +243,6 @@ export default function TripTicketCard({
                     )}
                 </div>
 
-                {/* Row 3: meta grid */}
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "10px 24px" }}
                      className="md:grid-cols-4">
                     <MetaCell label="Departure" value={dateRange} />
@@ -271,7 +251,6 @@ export default function TripTicketCard({
                     <MetaCell label="Budget" value={BUDGET_LABELS[budget] || budget} />
                 </div>
 
-                {/* Row 4: member preview OR owner info */}
                 {hasCrew ? (
                     <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
                         <MemberPreview members={memberPreview} maxVisible={3} size={26} />
@@ -302,7 +281,6 @@ export default function TripTicketCard({
                     </>
                 )}
 
-                {/* CTA row */}
                 <div style={{ marginTop: "auto", paddingTop: "4px", display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap" }}>
 
                     {variant === "explore" && (
@@ -371,7 +349,6 @@ export default function TripTicketCard({
                         </span>
                     )}
 
-                    {/* Crew Room button */}
                     {(variant === "owned" || variant === "joined") && onOpenRoom && (
                         <button
                             onClick={() => onOpenRoom(trip)}
@@ -405,7 +382,6 @@ export default function TripTicketCard({
                 </div>
             </div>
 
-            {/* ── Dashed perforation ────────────────────────────────────────── */}
             <div
                 className="hidden md:block"
                 style={{
@@ -418,12 +394,10 @@ export default function TripTicketCard({
                     position: "relative",
                 }}
             >
-                {/* Notch circles */}
                 <div style={{ position: "absolute", top: "-16px", left: "50%", transform: "translateX(-50%)", width: "20px", height: "20px", borderRadius: "50%", background: C.beigeLight, border: `1px solid ${C.tanBorder}` }} />
                 <div style={{ position: "absolute", bottom: "-16px", left: "50%", transform: "translateX(-50%)", width: "20px", height: "20px", borderRadius: "50%", background: C.beigeLight, border: `1px solid ${C.tanBorder}` }} />
             </div>
 
-            {/* ── Stub ──────────────────────────────────────────────────────── */}
             <div
                 className="hidden md:flex"
                 style={{
@@ -433,7 +407,6 @@ export default function TripTicketCard({
                     flexShrink: 0, minWidth: "120px", maxWidth: "140px",
                 }}
             >
-                {/* Gate */}
                 <div style={{ textAlign: "center" }}>
                     <p style={{ fontFamily: SANS, fontWeight: 700, fontSize: "9px", textTransform: "uppercase", letterSpacing: "0.14em", color: C.tan, margin: "0 0 2px" }}>
                         Gate
@@ -443,10 +416,10 @@ export default function TripTicketCard({
                     </p>
                 </div>
 
-                {/* Barcode */}
                 <BarcodeDecoration tripId={tripId} />
 
-                {/* Trip ref */}
+                <WeatherBadge city={destinationCity} country={destinationCountry} />
+
                 <p style={{ fontFamily: SANS, fontSize: "7px", letterSpacing: "0.10em", color: C.tan, textAlign: "center", margin: 0, opacity: 0.70 }}>
                     {tripRef}
                 </p>

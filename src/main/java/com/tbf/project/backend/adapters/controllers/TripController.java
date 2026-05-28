@@ -1,17 +1,13 @@
 package com.tbf.project.backend.adapters.controllers;
 
 import com.tbf.project.backend.adapters.security.CustomUserDetails;
-import com.tbf.project.backend.application.dto.CreateTripInputDto;
-import com.tbf.project.backend.application.dto.TripCardResponseDto;
-import com.tbf.project.backend.application.dto.TripJoinRequestInputDto;
-import com.tbf.project.backend.application.dto.TripJoinRequestResponseDto;
+import com.tbf.project.backend.application.dto.*;
 import com.tbf.project.backend.application.usecases.*;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
-import com.tbf.project.backend.application.dto.TripCrewInsightsResponseDto;
 import com.tbf.project.backend.application.usecases.GetTripCrewInsightsUseCase;
 import java.util.List;
 
@@ -29,6 +25,7 @@ public class TripController {
     private final ApproveTripJoinRequestUseCase approveTripJoinRequestUseCase;
     private final RejectTripJoinRequestUseCase rejectTripJoinRequestUseCase;
     private final GetTripCrewInsightsUseCase getTripCrewInsightsUseCase;
+    private final GetCrewCompatibilityUseCase getCrewCompatibilityUseCase;
 
     @PostMapping
     public ResponseEntity<TripCardResponseDto> createTrip(
@@ -115,5 +112,13 @@ public class TripController {
         return ResponseEntity.ok(
                 getTripCrewInsightsUseCase.execute(currentUserId, tripId)
         );
+    }
+    @GetMapping("/{tripId}/crew-compatibility")
+    public ResponseEntity<CrewCompatibilityResponseDto> getCrewCompatibility(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @PathVariable Long tripId
+    ) {
+        Long currentUserId = userDetails.getUser().getId();
+        return ResponseEntity.ok(getCrewCompatibilityUseCase.execute(currentUserId, tripId));
     }
 }

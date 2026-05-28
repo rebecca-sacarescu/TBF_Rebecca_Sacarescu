@@ -86,122 +86,30 @@ public class GenerateTripPlanUseCaseImpl implements GenerateTripPlanUseCase {
         return aiTripPlanMapper.toDto(saved, generatedByName);
     }
 
-    private String buildPrompt(
-            Trip trip,
-            UserProfile requester,
-            List<UserProfile> crewProfiles,
-            GenerateTripPlanInputDto input
-    ) {
+    private String buildPrompt(Trip trip, UserProfile requester, List<UserProfile> crewProfiles, GenerateTripPlanInputDto input) {
         long tripDays = ChronoUnit.DAYS.between(trip.getStartDate(), trip.getEndDate());
         if (tripDays <= 0) tripDays = 1;
 
-        // Crew aggregate stats
-        Map<Budget, Long> budgetFreq = crewProfiles.stream()
-                .filter(p -> p.getBudget() != null)
-                .collect(Collectors.groupingBy(UserProfile::getBudget, Collectors.counting()));
-        Budget dominantBudget = budgetFreq.entrySet().stream()
-                .max(Map.Entry.comparingByValue())
-                .map(Map.Entry::getKey)
-                .orElse(trip.getBudget());
-
-        Map<SocialBattery, Long> socialFreq = crewProfiles.stream()
-                .filter(p -> p.getSocialBattery() != null)
-                .collect(Collectors.groupingBy(UserProfile::getSocialBattery, Collectors.counting()));
-        SocialBattery dominantSocial = socialFreq.entrySet().stream()
-                .max(Map.Entry.comparingByValue())
-                .map(Map.Entry::getKey)
-                .orElse(requester.getSocialBattery());
-
-        Map<PlanningStyle, Long> planningFreq = crewProfiles.stream()
-                .filter(p -> p.getPlanningStyle() != null)
-                .collect(Collectors.groupingBy(UserProfile::getPlanningStyle, Collectors.counting()));
-        PlanningStyle dominantPlanning = planningFreq.entrySet().stream()
-                .max(Map.Entry.comparingByValue())
-                .map(Map.Entry::getKey)
-                .orElse(requester.getPlanningStyle());
-
-        // Top shared activities
-        Map<String, Long> activityFreq = crewProfiles.stream()
-                .filter(p -> p.getActivities() != null)
-                .flatMap(p -> p.getActivities().stream())
-                .collect(Collectors.groupingBy(a -> a, Collectors.counting()));
-        List<String> topActivities = activityFreq.entrySet().stream()
-                .sorted(Map.Entry.<String, Long>comparingByValue().reversed())
-                .limit(5)
-                .map(Map.Entry::getKey)
-                .collect(Collectors.toList());
-
-        // Top shared languages
-        Map<String, Long> langFreq = crewProfiles.stream()
-                .filter(p -> p.getLanguages() != null)
-                .flatMap(p -> p.getLanguages().stream())
-                .collect(Collectors.groupingBy(l -> l, Collectors.counting()));
-        List<String> topLanguages = langFreq.entrySet().stream()
-                .sorted(Map.Entry.<String, Long>comparingByValue().reversed())
-                .limit(3)
-                .map(Map.Entry::getKey)
-                .collect(Collectors.toList());
-
         String userPromptSection = (input.userPrompt() != null && !input.userPrompt().isBlank())
-                ? "Additional request from the traveler: " + input.userPrompt().trim()
+                ? "Extra: " + input.userPrompt().trim()
                 : "";
 
         return String.format("""
-                You are an expert travel planner. Generate a detailed, realistic trip itinerary strictly in JSON format.
-                
-                TRIP DETAILS:
-                - Destination: %s, %s
-                - Duration: %d days (from %s to %s)
-                - Trip type: %s
-                - Trip budget level: %s
-                
-                CREW PROFILE (%d travelers):
-                - Dominant budget style: %s
-                - Dominant social battery: %s
-                - Dominant planning style: %s
-                - Top shared activities: %s
-                - Shared languages: %s
-                
-                %s
-                
-                IMPORTANT: Respond ONLY with a valid JSON object, no markdown, no explanation, no backticks.
-                JSON structure:
-                {
-                  "title": "catchy itinerary title",
-                  "summary": "2-3 sentence overview of the trip experience",
-                  "estimatedBudgetPerPerson": "e.g. €300-500",
-                  "days": [
-                    {
-                      "dayNumber": 1,
-                      "theme": "short theme for the day",
-                      "activities": [
-                        {
-                          "time": "Morning / Afternoon / Evening / Night",
-                          "name": "activity name",
-                          "description": "1-2 sentence description",
-                          "estimatedCost": "e.g. Free / €15 / €30-50",
-                          "tip": "practical insider tip"
-                        }
-                      ]
-                    }
-                  ],
-                  "generalTips": ["tip1", "tip2", "tip3"],
-                  "neighborhoods": ["neighborhood1", "neighborhood2"]
-                }
-                """,
+            Create a short trip plan for %s, %s (%d days, %s budget, %s style).
+            Group: %d people.
+            %s
+            
+            Reply ONLY with this exact JSON, nothing else:
+            {"title":"...","summary":"one sentence","estimatedBudgetPerPerson":"e.g. 200-400 EUR","days":[{"dayNumber":1,"theme":"...","activities":[{"time":"Morning","name":"place name","description":"one sentence","estimatedCost":"Free","tip":"short tip"},{"time":"Afternoon","name":"place name","description":"one sentence","estimatedCost":"10 EUR","tip":"short tip"}]}],"generalTips":["tip1","tip2"],"neighborhoods":["area1"]}
+            
+            Keep descriptions under 10 words each. Maximum 2 activities per day.
+            """,
                 trip.getDestinationCity(),
                 trip.getDestinationCountry(),
                 tripDays,
-                trip.getStartDate(),
-                trip.getEndDate(),
-                formatEnum(trip.getTripType()),
                 formatEnum(trip.getBudget()),
+                formatEnum(trip.getTripType()),
                 crewProfiles.size(),
-                formatEnum(dominantBudget),
-                formatEnum(dominantSocial),
-                formatEnum(dominantPlanning),
-                topActivities.isEmpty() ? "not specified" : String.join(", ", topActivities),
-                topLanguages.isEmpty() ? "not specified" : String.join(", ", topLanguages),
                 userPromptSection
         );
     }

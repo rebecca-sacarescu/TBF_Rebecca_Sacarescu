@@ -1,6 +1,7 @@
 package com.tbf.project.backend.application.usecases.impl;
 
 import com.tbf.project.backend.application.dto.TripJoinRequestInputDto;
+import com.tbf.project.backend.application.usecases.ComputeAndSaveCrewCompatibilityUseCase;
 import com.tbf.project.backend.application.usecases.RequestToJoinTripUseCase;
 import com.tbf.project.backend.entities.gateway.ProfileGateway;
 import com.tbf.project.backend.entities.gateway.TripGateway;
@@ -20,17 +21,20 @@ public class RequestToJoinTripUseCaseImpl implements RequestToJoinTripUseCase {
     private final TripMemberGateway tripMemberGateway;
     private final TripJoinRequestGateway tripJoinRequestGateway;
     private final ProfileGateway profileGateway;
+    private final ComputeAndSaveCrewCompatibilityUseCase computeAndSaveCrewCompatibilityUseCase;
 
     public RequestToJoinTripUseCaseImpl(
             TripGateway tripGateway,
             TripMemberGateway tripMemberGateway,
             TripJoinRequestGateway tripJoinRequestGateway,
-            ProfileGateway profileGateway
+            ProfileGateway profileGateway,
+            ComputeAndSaveCrewCompatibilityUseCase computeAndSaveCrewCompatibilityUseCase
     ) {
         this.tripGateway = tripGateway;
         this.tripMemberGateway = tripMemberGateway;
         this.tripJoinRequestGateway = tripJoinRequestGateway;
         this.profileGateway = profileGateway;
+        this.computeAndSaveCrewCompatibilityUseCase = computeAndSaveCrewCompatibilityUseCase;
     }
 
     @Override
@@ -79,5 +83,7 @@ public class RequestToJoinTripUseCaseImpl implements RequestToJoinTripUseCase {
                 .createdAt(LocalDateTime.now())
                 .resolvedAt(null)
                 .build());
+
+        computeAndSaveCrewCompatibilityUseCase.execute(tripId, currentUserId);
     }
 }

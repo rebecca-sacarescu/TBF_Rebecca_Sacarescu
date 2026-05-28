@@ -170,3 +170,14 @@ export async function getCrewInsights(tripId) {
     }
     return response.json();
 }
+export async function getCrewCompatibility(tripId) {
+    const response = await fetch(`${BASE_URL}/trips/${tripId}/crew-compatibility`, {
+        method: "GET",
+        headers: authHeaders(),
+    });
+    if (!response.ok) {
+        const err = await parseBackendError(response);
+        throw new Error(err);
+    }
+    return response.json();
+}

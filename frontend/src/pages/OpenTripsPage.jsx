@@ -1,8 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { getJoinableTrips, requestToJoinTrip } from "../services/tripsApi";
 import TripTicketCard from "../components/TripTicketCard";
-
-// ─── Enum maps ────────────────────────────────────────────────────────────────
+import CrewCompatibilityBadge from "../components/CrewCompatibilityBadge";
 
 const TRIP_TYPE_OPTIONS = [
     { value: "", label: "All Types" },
@@ -21,8 +20,6 @@ const BUDGET_OPTIONS = [
     { value: "LUXURY", label: "Luxury" },
 ];
 
-// ─── Spinner ──────────────────────────────────────────────────────────────────
-
 function Spinner({ label = "Loading..." }) {
     return (
         <div className="flex flex-col items-center gap-3 py-32">
@@ -32,8 +29,6 @@ function Spinner({ label = "Loading..." }) {
         </div>
     );
 }
-
-// ─── Empty state ──────────────────────────────────────────────────────────────
 
 function EmptyState({ hasFilters, onClearFilters }) {
     return (
@@ -65,8 +60,6 @@ function EmptyState({ hasFilters, onClearFilters }) {
     );
 }
 
-// ─── Error state ──────────────────────────────────────────────────────────────
-
 function ErrorState({ message, onRetry }) {
     return (
         <div className="flex flex-col items-center justify-center gap-4 py-20 text-center rounded-xl"
@@ -80,8 +73,6 @@ function ErrorState({ message, onRetry }) {
         </div>
     );
 }
-
-// ─── Join Request Panel ───────────────────────────────────────────────────────
 
 function JoinRequestPanel({ trip, onClose, onSuccess }) {
     const [message, setMessage] = useState("");
@@ -118,6 +109,9 @@ function JoinRequestPanel({ trip, onClose, onSuccess }) {
                 </div>
             ) : (
                 <>
+                    <div style={{ marginBottom: "4px" }}>
+                        <CrewCompatibilityBadge tripId={trip.tripId} />
+                    </div>
                     <div>
                         <label className="font-label uppercase block mb-2" style={{ fontSize: "9px", letterSpacing: "0.14em", fontWeight: 600, color: "#A5937B" }}>
                             Your message to {trip.ownerFullName || "the organizer"}
@@ -151,8 +145,6 @@ function JoinRequestPanel({ trip, onClose, onSuccess }) {
     );
 }
 
-// ─── Filter pill ──────────────────────────────────────────────────────────────
-
 function FilterPill({ label, active, onClick }) {
     return (
         <button onClick={onClick}
@@ -168,8 +160,6 @@ function FilterPill({ label, active, onClick }) {
         </button>
     );
 }
-
-// ─── OpenTripsPage ────────────────────────────────────────────────────────────
 
 export default function OpenTripsPage({ onNavigate }) {
     const [trips, setTrips] = useState([]);
@@ -213,7 +203,6 @@ export default function OpenTripsPage({ onNavigate }) {
     return (
         <div className="space-y-8">
 
-            {/* ── Page header ─────────────────────────────────────────────── */}
             <section className="relative rounded-xl overflow-hidden" style={{ background: "#ffffff", border: "1px solid rgba(165,147,123,0.25)", boxShadow: "0 4px 0 #bfb9b4, 0 8px 28px rgba(165,147,123,0.10)" }}>
                 <div className="h-24 md:h-32 w-full relative overflow-hidden" style={{ background: "linear-gradient(135deg, #666161 0%, #575353 40%, #4d4949 100%)" }}>
                     <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 40%, rgba(58,55,55,0.55) 100%)" }} />
@@ -249,7 +238,6 @@ export default function OpenTripsPage({ onNavigate }) {
                 </div>
             </section>
 
-            {/* ── Filter bar ────────────────────────────────────────────────── */}
             <div className="rounded-xl px-5 py-4 flex flex-col md:flex-row gap-4 md:items-center"
                  style={{ background: "#ffffff", boxShadow: "0 2px 0 #d4cec9", border: "1px solid rgba(165,147,123,0.25)" }}>
                 <div className="relative flex-1 min-w-0">
@@ -276,7 +264,6 @@ export default function OpenTripsPage({ onNavigate }) {
                 </div>
             </div>
 
-            {/* ── Content ───────────────────────────────────────────────────── */}
             {loading && <Spinner label="Finding departures..." />}
             {!loading && error && <ErrorState message={error} onRetry={fetchTrips} />}
             {!loading && !error && filtered.length === 0 && (
@@ -294,6 +281,11 @@ export default function OpenTripsPage({ onNavigate }) {
                                     trip={trip}
                                     variant={alreadyRequested ? "joined" : "explore"}
                                     onRequestBoardingClick={handleRequestBoarding}
+                                    rightSlot={
+                                        !alreadyRequested
+                                            ? <CrewCompatibilityBadge tripId={trip.tripId} />
+                                            : null
+                                    }
                                 />
                                 {panelOpen && (
                                     <JoinRequestPanel trip={trip} onClose={() => setOpenJoinPanelId(null)} onSuccess={handleJoinSuccess} />
@@ -304,7 +296,6 @@ export default function OpenTripsPage({ onNavigate }) {
                 </div>
             )}
 
-            {/* ── Footer CTA ────────────────────────────────────────────────── */}
             {!loading && !error && (
                 <div className="text-center pt-4 pb-8">
                     <p className="font-label text-xs uppercase tracking-widest mb-3" style={{ letterSpacing: "0.14em", color: "#A5937B" }}>Want to lead your own trip?</p>

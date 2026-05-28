@@ -283,13 +283,15 @@ public class UseCaseConfig {
             TripGateway tripGateway,
             TripMemberGateway tripMemberGateway,
             TripJoinRequestGateway tripJoinRequestGateway,
-            ProfileGateway profileGateway
+            ProfileGateway profileGateway,
+            ComputeAndSaveCrewCompatibilityUseCase computeAndSaveCrewCompatibilityUseCase
     ) {
         return new RequestToJoinTripUseCaseImpl(
                 tripGateway,
                 tripMemberGateway,
                 tripJoinRequestGateway,
-                profileGateway
+                profileGateway,
+                computeAndSaveCrewCompatibilityUseCase
         );
     }
 
@@ -340,12 +342,16 @@ public class UseCaseConfig {
     public ApproveTripJoinRequestUseCase approveTripJoinRequestUseCase(
             TripGateway tripGateway,
             TripJoinRequestGateway tripJoinRequestGateway,
-            TripMemberGateway tripMemberGateway
+            TripMemberGateway tripMemberGateway,
+            TripCrewCompatibilityGateway tripCrewCompatibilityGateway,
+            CrewCompatibilityCacheGateway crewCompatibilityCacheGateway
     ) {
         return new ApproveTripJoinRequestUseCaseImpl(
                 tripGateway,
                 tripJoinRequestGateway,
-                tripMemberGateway
+                tripMemberGateway,
+                tripCrewCompatibilityGateway,
+                crewCompatibilityCacheGateway
         );
     }
 
@@ -455,5 +461,52 @@ public class UseCaseConfig {
                 aiTripPlanGateway,
                 aiTripPlanMapper
         );
+    }
+    @Bean
+    public CrewCompatibilityService crewCompatibilityService(
+            ReciprocalCompatibilityCalculator reciprocalCompatibilityCalculator,
+            ProfileVectorizer profileVectorizer
+    ) {
+        return new CrewCompatibilityService(reciprocalCompatibilityCalculator, profileVectorizer);
+    }
+
+    @Bean
+    public ComputeAndSaveCrewCompatibilityUseCase computeAndSaveCrewCompatibilityUseCase(
+            TripMemberGateway tripMemberGateway,
+            ProfileGateway profileGateway,
+            TripCrewCompatibilityGateway tripCrewCompatibilityGateway,
+            CrewCompatibilityCacheGateway crewCompatibilityCacheGateway,
+            CrewCompatibilityService crewCompatibilityService
+    ) {
+        return new ComputeAndSaveCrewCompatibilityUseCaseImpl(
+                tripMemberGateway,
+                profileGateway,
+                tripCrewCompatibilityGateway,
+                crewCompatibilityCacheGateway,
+                crewCompatibilityService
+        );
+    }
+
+    @Bean
+    public GetCrewCompatibilityUseCase getCrewCompatibilityUseCase(
+            TripGateway tripGateway,
+            TripMemberGateway tripMemberGateway,
+            ProfileGateway profileGateway,
+            TripCrewCompatibilityGateway tripCrewCompatibilityGateway,
+            CrewCompatibilityCacheGateway crewCompatibilityCacheGateway,
+            CrewCompatibilityService crewCompatibilityService
+    ) {
+        return new GetCrewCompatibilityUseCaseImpl(
+                tripGateway,
+                tripMemberGateway,
+                profileGateway,
+                tripCrewCompatibilityGateway,
+                crewCompatibilityCacheGateway,
+                crewCompatibilityService
+        );
+    }
+    @Bean
+    public com.fasterxml.jackson.databind.ObjectMapper objectMapper() {
+        return new com.fasterxml.jackson.databind.ObjectMapper();
     }
 }
