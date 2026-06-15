@@ -2,7 +2,6 @@ import { useState } from "react";
 import profileApi, { parseApiError } from "../services/profileApi";
 import ChipSelector from "../components/ChipSelector";
 
-// ─── Palette ──────────────────────────────────────────────────────────────────
 const C = {
     beigeLight: "#E9E3DE",
     beigeMid:   "#faf8f6",
@@ -22,7 +21,6 @@ const C = {
 const SERIF = "'DM Serif Display', serif";
 const SANS  = "'DM Sans', sans-serif";
 
-// ─── Step config — unchanged ──────────────────────────────────────────────────
 const STEPS = [
     { key: "identity",  label: "Passenger Identity",      number: 1 },
     { key: "dna",       label: "Travel DNA",               number: 2 },
@@ -56,7 +54,6 @@ const LANGUAGE_OPTIONS    = ["English","French","Spanish","German","Italian","Po
 const LOOKING_WHO_OPTIONS = ["Solo Travelers","Couples","Families","Small Groups","Digital Nomads"];
 const LOOKING_WHAT_OPTIONS= ["Relaxation","Hidden Gems","Nightlife","City Exploration","Local Dinners","Adventure","Cultural Exchange"];
 
-// ─── Empty form — unchanged ───────────────────────────────────────────────────
 const emptyForm = () => ({
     fullName: "", birthDate: "", gender: "", originCountry: "", originCity: "",
     currentLocation: "", profilePictureUrl: "", bio: "",
@@ -65,7 +62,6 @@ const emptyForm = () => ({
     languages: [], lookingForWho: [], lookingForWhat: [],
 });
 
-// ─── Validation — unchanged ───────────────────────────────────────────────────
 function validateStep(step, form) {
     const e = {};
     if (step === 0) {
@@ -92,7 +88,6 @@ function validateStep(step, form) {
     return e;
 }
 
-// ─── Shared input style ───────────────────────────────────────────────────────
 function inputStyle(hasError = false) {
     return {
         width: "100%",
@@ -110,7 +105,6 @@ function inputStyle(hasError = false) {
     };
 }
 
-// ─── Field block ──────────────────────────────────────────────────────────────
 function FieldBlock({ label, error, children, optional = false }) {
     return (
         <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
@@ -135,7 +129,6 @@ function FieldBlock({ label, error, children, optional = false }) {
     );
 }
 
-// ─── Section title ────────────────────────────────────────────────────────────
 function SectionTitle({ children }) {
     return (
         <p style={{
@@ -153,7 +146,6 @@ function SectionTitle({ children }) {
     );
 }
 
-// ─── Raised button ────────────────────────────────────────────────────────────
 function RaisedButton({ onClick, disabled, loading, children, variant = "primary", type = "button" }) {
     const schemes = {
         primary: {
@@ -206,7 +198,6 @@ function RaisedButton({ onClick, disabled, loading, children, variant = "primary
     );
 }
 
-// ─── DNA card ─────────────────────────────────────────────────────────────────
 function DnaCard({ option, isActive, onClick }) {
     return (
         <button
@@ -259,7 +250,6 @@ function DnaCard({ option, isActive, onClick }) {
     );
 }
 
-// ─── DNA section ──────────────────────────────────────────────────────────────
 function DnaSection({ label, options, selected, onChange, error }) {
     return (
         <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
@@ -281,7 +271,6 @@ function DnaSection({ label, options, selected, onChange, error }) {
     );
 }
 
-// ─── Gender pill ──────────────────────────────────────────────────────────────
 function GenderPill({ label, selected, onClick }) {
     return (
         <button
@@ -315,7 +304,6 @@ function GenderPill({ label, selected, onClick }) {
     );
 }
 
-// ─── Progress bar ─────────────────────────────────────────────────────────────
 function ProgressStrip({ step, total }) {
     return (
         <div style={{
@@ -330,7 +318,6 @@ function ProgressStrip({ step, total }) {
                     {STEPS.map((s, i) => (
                         <div key={s.key} style={{ display: "flex", alignItems: "center", flex: i < total - 1 ? 1 : "none" }}>
                             <div style={{ display: "flex", alignItems: "center", gap: "6px", flexShrink: 0 }}>
-                                {/* Dot */}
                                 <div style={{
                                     width: "20px", height: "20px", borderRadius: "50%",
                                     display: "flex", alignItems: "center", justifyContent: "center",
@@ -364,7 +351,6 @@ function ProgressStrip({ step, total }) {
                                     {s.label}
                                 </span>
                             </div>
-                            {/* Connector line */}
                             {i < total - 1 && (
                                 <div style={{
                                     flex: 1, height: "1px", margin: "0 10px",
@@ -378,7 +364,6 @@ function ProgressStrip({ step, total }) {
                     ))}
                 </div>
 
-                {/* Progress bar */}
                 <div style={{ height: "3px", background: "rgba(233,227,222,0.15)", borderRadius: "999px", overflow: "hidden" }}>
                     <div style={{
                         height: "100%", borderRadius: "999px",
@@ -392,7 +377,6 @@ function ProgressStrip({ step, total }) {
     );
 }
 
-// ─── Input with focus handling ─────────────────────────────────────────────────
 function StyledInput({ type = "text", value, onChange, placeholder, hasError, rows }) {
     const base = inputStyle(hasError);
     const handleFocus = (e) => {
@@ -422,7 +406,6 @@ function StyledInput({ type = "text", value, onChange, placeholder, hasError, ro
     );
 }
 
-// ─── Main component ───────────────────────────────────────────────────────────
 export default function CreateProfilePage({ onNavigate }) {
     const [step, setStep]         = useState(0);
     const [form, setForm]         = useState(emptyForm());
@@ -493,14 +476,11 @@ export default function CreateProfilePage({ onNavigate }) {
                 </span>
             </header>
 
-            {/* Progress strip */}
             <ProgressStrip step={step} total={STEPS.length} />
 
-            {/* Main */}
             <main style={{ flex: 1, display: "flex", justifyContent: "center", padding: "32px 16px 48px", alignItems: "flex-start" }}>
                 <div style={{ width: "100%", maxWidth: "720px" }}>
 
-                    {/* Step header */}
                     <div style={{ marginBottom: "28px" }}>
                         <p style={{ fontFamily: SANS, fontWeight: 600, fontSize: "10px", textTransform: "uppercase", letterSpacing: "0.18em", color: C.tan, margin: "0 0 6px" }}>
                             Step {step + 1} of {STEPS.length}
@@ -513,7 +493,6 @@ export default function CreateProfilePage({ onNavigate }) {
                         </p>
                     </div>
 
-                    {/* API error */}
                     {apiError && (
                         <div style={{
                             background: C.errorBg, border: `1px solid ${C.error}22`,
@@ -525,7 +504,6 @@ export default function CreateProfilePage({ onNavigate }) {
                         </div>
                     )}
 
-                    {/* Card */}
                     <div style={{
                         background: C.white, borderRadius: "20px",
                         border: `1px solid ${C.tanBorder}`,
@@ -534,7 +512,6 @@ export default function CreateProfilePage({ onNavigate }) {
                         marginBottom: "24px",
                     }}>
 
-                        {/* ── STEP 1: Passenger Identity ── */}
                         {step === 0 && (
                             <div style={{ display: "flex", flexDirection: "column", gap: "22px" }}>
                                 <SectionTitle>Personal Details</SectionTitle>
@@ -629,7 +606,6 @@ export default function CreateProfilePage({ onNavigate }) {
                             </div>
                         )}
 
-                        {/* ── STEP 2: Travel DNA ── */}
                         {step === 1 && (
                             <div style={{ display: "flex", flexDirection: "column", gap: "28px" }}>
                                 <DnaSection label="Social Battery"  options={SOCIAL_BATTERY} selected={form.socialBattery} onChange={(v) => setField("socialBattery", v)} error={errors.socialBattery} />
@@ -640,7 +616,6 @@ export default function CreateProfilePage({ onNavigate }) {
                             </div>
                         )}
 
-                        {/* ── STEP 3: Interests ── */}
                         {step === 2 && (
                             <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
                                 <ChipSelector label="Activities"       options={ACTIVITY_OPTIONS}    selected={form.activities}       onChange={(v) => setField("activities",       v)} />
@@ -660,7 +635,6 @@ export default function CreateProfilePage({ onNavigate }) {
                         )}
                     </div>
 
-                    {/* Bottom nav */}
                     <div style={{
                         display: "flex", alignItems: "center", justifyContent: "space-between",
                         padding: "14px 18px",
@@ -669,7 +643,7 @@ export default function CreateProfilePage({ onNavigate }) {
                         boxShadow: `0 5px 0 #bfb9b4, 0 8px 24px rgba(165,147,123,0.18), inset 0 1px 0 rgba(255,255,255,0.65)`,
                         border: `1px solid ${C.tanBorder}`,
                     }}>
-                        {/* Left meta */}
+
                         <div style={{ display: "flex", gap: "20px", paddingLeft: "6px" }}>
                             <div>
                                 <p style={{ fontFamily: SANS, fontWeight: 700, fontSize: "8px", textTransform: "uppercase", letterSpacing: "0.16em", color: C.tan, margin: "0 0 2px" }}>
@@ -689,7 +663,6 @@ export default function CreateProfilePage({ onNavigate }) {
                             </div>
                         </div>
 
-                        {/* Buttons */}
                         <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
                             {step > 0 && (
                                 <RaisedButton onClick={handleBack} variant="ghost">
@@ -722,7 +695,6 @@ export default function CreateProfilePage({ onNavigate }) {
                 </div>
             </main>
 
-            {/* Footer */}
             <footer style={{
                 background: C.beigeLight,
                 borderTop: `1px solid ${C.tanBorder}`,

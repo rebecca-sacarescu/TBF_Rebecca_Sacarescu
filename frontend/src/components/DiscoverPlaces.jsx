@@ -1,17 +1,3 @@
-/**
- * DiscoverPlaces.jsx
- *
- * Shows popular places near a destination.
- * Used in:
- *   - TripRoomPage (full panel with detail expand)
- *   - CreateTripForm (compact preview after city is entered)
- *
- * Props:
- *   city        {string}
- *   country     {string}
- *   tripType    {string}  — TripType enum, used to filter relevant places
- *   compact     {boolean} — compact mode for CreateTrip form
- */
 
 import { useState, useEffect, useCallback } from "react";
 import { geocodeCity, getWeeklyForecast } from "../services/weatherApi";
@@ -31,8 +17,6 @@ const C = {
 };
 const SERIF = "'DM Serif Display', serif";
 const SANS  = "'DM Sans', sans-serif";
-
-// ─── Place card ───────────────────────────────────────────────────────────────
 
 function PlaceCard({ place, onClick, compact }) {
     const tags = formatKinds(place.kinds);
@@ -63,7 +47,6 @@ function PlaceCard({ place, onClick, compact }) {
                 e.currentTarget.style.transform = "translateY(0)";
             }}
         >
-            {/* Place name */}
             <p style={{
                 fontFamily: SERIF,
                 fontSize: compact ? "13px" : "15px",
@@ -74,7 +57,6 @@ function PlaceCard({ place, onClick, compact }) {
                 {place.name}
             </p>
 
-            {/* Distance */}
             {place.distance != null && (
                 <span style={{
                     fontFamily: SANS, fontWeight: 600, fontSize: "10px",
@@ -86,7 +68,6 @@ function PlaceCard({ place, onClick, compact }) {
                 </span>
             )}
 
-            {/* Category tags */}
             {tags.length > 0 && (
                 <div style={{ display: "flex", flexWrap: "wrap", gap: "4px" }}>
                     {tags.map((tag, i) => (
@@ -106,8 +87,6 @@ function PlaceCard({ place, onClick, compact }) {
         </button>
     );
 }
-
-// ─── Place detail modal overlay ───────────────────────────────────────────────
 
 function PlaceDetail({ xid, name, onClose }) {
     const [detail, setDetail]   = useState(null);
@@ -239,8 +218,6 @@ function PlaceDetail({ xid, name, onClose }) {
     );
 }
 
-// ─── DiscoverPlaces ───────────────────────────────────────────────────────────
-
 export default function DiscoverPlaces({ city, country, tripType = "", compact = false }) {
     const [places,  setPlaces]  = useState([]);
     const [loading, setLoading] = useState(true);
@@ -271,7 +248,6 @@ export default function DiscoverPlaces({ city, country, tripType = "", compact =
     }, [city, country, tripType, limit]);
 
     if (compact) {
-        // Compact mode — used inside CreateTripForm after city is typed
         return (
             <div style={{ display: "flex", flexDirection: "column", gap: "10px", fontFamily: SANS }}>
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
@@ -309,7 +285,6 @@ export default function DiscoverPlaces({ city, country, tripType = "", compact =
         );
     }
 
-    // Full mode — used in Trip Room
     return (
         <section style={{
             background: C.white,
@@ -319,10 +294,8 @@ export default function DiscoverPlaces({ city, country, tripType = "", compact =
             overflow: "hidden",
             fontFamily: SANS,
         }}>
-            {/* Accent strip */}
             <div style={{ height: "2px", background: `linear-gradient(to right, ${C.grayWarm}, ${C.tan}, ${C.lavender})` }} />
 
-            {/* Header */}
             <div style={{
                 padding: "16px 20px 14px",
                 borderBottom: `1px solid ${C.tanBorder}`,
@@ -349,7 +322,6 @@ export default function DiscoverPlaces({ city, country, tripType = "", compact =
             </div>
             <style>{`@keyframes dp-spin{to{transform:rotate(360deg)}}`}</style>
 
-            {/* Body */}
             <div style={{ padding: "16px 20px 20px" }}>
 
                 {!loading && error && (
@@ -362,7 +334,6 @@ export default function DiscoverPlaces({ city, country, tripType = "", compact =
                     </p>
                 )}
 
-                {/* Skeleton while loading */}
                 {loading && (
                     <>
                         <style>{`@keyframes dp-shimmer{0%{background-position:-400px 0}100%{background-position:400px 0}}.dp-bone{background:linear-gradient(90deg,rgba(165,147,123,0.10) 25%,rgba(165,147,123,0.22) 37%,rgba(165,147,123,0.10) 63%);background-size:400px 100%;animation:dp-shimmer 1.4s ease infinite;border-radius:12px}`}</style>

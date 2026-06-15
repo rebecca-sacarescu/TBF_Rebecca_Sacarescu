@@ -1,6 +1,3 @@
-// BoardingPassLayout.jsx — redesigned with new palette
-// Props interface unchanged: children, stub, footerLinkText, footerLink, onFooterClick
-
 const C = {
     beigeLight: "#E9E3DE",
     beigeMid:   "#faf8f6",
@@ -15,7 +12,6 @@ const C = {
 const SERIF = "'DM Serif Display', serif";
 const SANS  = "'DM Sans', sans-serif";
 
-// Barcode — deterministic, same pattern as before
 function Barcode({ code }) {
     const widths = [1, 2.5, 0.5, 3, 1, 1.5, 0.5, 2, 4, 1, 0.5, 2, 1, 3, 0.5];
     return (
@@ -49,13 +45,12 @@ export default function BoardingPassLayout({
                 linear-gradient(135deg, ${C.beigeLight} 0%, #f0ebe6 50%, #ede6e0 100%)
             `,
         }}>
-            {/* Google Fonts */}
             <link rel="preconnect" href="https://fonts.googleapis.com" />
             <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
             <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
 
             <div style={{ width: "100%", maxWidth: "860px" }}>
-                {/* Header */}
+
                 <header style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "18px", paddingLeft: "4px" }}>
                     <div style={{
                         background: `linear-gradient(135deg, ${C.grayWarm} 0%, #575353 100%)`,
@@ -72,7 +67,6 @@ export default function BoardingPassLayout({
                     </span>
                 </header>
 
-                {/* Boarding pass card */}
                 <div style={{
                     background: C.white,
                     borderRadius: "20px",
@@ -82,7 +76,7 @@ export default function BoardingPassLayout({
                     border: `1px solid ${C.tanBorder}`,
                     boxShadow: `0 5px 0 #bfb9b4, 0 10px 40px rgba(165,147,123,0.14), 0 2px 8px rgba(165,147,123,0.08)`,
                 }}>
-                    {/* Main area */}
+
                     <div style={{
                         flex: "3",
                         padding: "32px 36px 36px",
@@ -91,7 +85,7 @@ export default function BoardingPassLayout({
                         position: "relative",
                         minWidth: 0,
                     }}>
-                        {/* Accent strip top */}
+
                         <div style={{
                             position: "absolute", top: 0, left: 0, right: 0, height: "3px",
                             background: `linear-gradient(to right, ${C.grayWarm}, ${C.tan}, ${C.lavender})`,
@@ -99,7 +93,6 @@ export default function BoardingPassLayout({
 
                         {children}
 
-                        {/* Decorative dots */}
                         <div style={{
                             position: "absolute", bottom: "18px", left: "36px",
                             display: "flex", gap: "5px",
@@ -110,7 +103,6 @@ export default function BoardingPassLayout({
                         </div>
                     </div>
 
-                    {/* Stub / right panel */}
                     <div style={{
                         display: "flex",
                         flex: "1",
@@ -122,13 +114,11 @@ export default function BoardingPassLayout({
                         alignItems: "center",
                         textAlign: "center",
                         position: "relative",
-                        // Dashed left border
                         backgroundImage: `linear-gradient(to bottom, ${C.tan} 50%, transparent 0%)`,
                         backgroundPosition: "left",
                         backgroundSize: "1px 8px",
                         backgroundRepeat: "repeat-y",
                     }}>
-                        {/* Notch circles */}
                         <div style={{
                             position: "absolute", left: "-10px", top: "50%",
                             transform: "translateY(-50%)",
@@ -140,7 +130,6 @@ export default function BoardingPassLayout({
                     </div>
                 </div>
 
-                {/* Footer link */}
                 {footerLinkText && (
                     <div style={{ marginTop: "18px", textAlign: "center" }}>
                         <p style={{ fontFamily: SANS, fontSize: "13px", color: C.tan, margin: 0 }}>

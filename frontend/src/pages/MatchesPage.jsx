@@ -16,7 +16,6 @@ const C = {
 const SERIF = "'DM Serif Display', serif";
 const SANS  = "'DM Sans', sans-serif";
 
-// ─── Enum display maps ─────────────────────────────────────────────────────────
 const SOCIAL_BATTERY = {
     INTROVERT:        { label: "Introvert" },
     AMBIVERT:         { label: "Ambivert" },
@@ -51,7 +50,6 @@ function getInitials(fullName = "") {
         .map((w) => w[0]?.toUpperCase() ?? "").join("");
 }
 
-// ─── Spinner ──────────────────────────────────────────────────────────────────
 function Spinner({ label = "Loading..." }) {
     return (
         <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "14px", padding: "80px 0", fontFamily: SANS }}>
@@ -62,7 +60,6 @@ function Spinner({ label = "Loading..." }) {
     );
 }
 
-// ─── Empty state ───────────────────────────────────────────────────────────────
 function EmptyState({ onNavigate }) {
     return (
         <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: "20px", padding: "80px 24px", textAlign: "center", background: C.white, borderRadius: "20px", border: `1.5px dashed ${C.tanBorder}` }}>
@@ -89,7 +86,6 @@ function EmptyState({ onNavigate }) {
     );
 }
 
-// ─── Error state ───────────────────────────────────────────────────────────────
 function ErrorState({ message, onRetry }) {
     return (
         <div style={{ background: C.white, borderRadius: "16px", border: `1.5px dashed rgba(186,26,26,0.30)`, padding: "24px", textAlign: "center" }}>
@@ -101,7 +97,6 @@ function ErrorState({ message, onRetry }) {
     );
 }
 
-// ─── Unmatch confirm ──────────────────────────────────────────────────────────
 function UnmatchConfirm({ name, onConfirm, onCancel, loading }) {
     return (
         <div style={{ position: "absolute", inset: 0, zIndex: 20, display: "flex", alignItems: "center", justifyContent: "center", borderRadius: "20px", overflow: "hidden" }}>
@@ -129,7 +124,6 @@ function UnmatchConfirm({ name, onConfirm, onCancel, loading }) {
     );
 }
 
-// ─── DNA pill ─────────────────────────────────────────────────────────────────
 function DnaPill({ label }) {
     return (
         <span style={{ display: "inline-flex", alignItems: "center", padding: "4px 10px", borderRadius: "999px", fontFamily: SANS, fontWeight: 600, fontSize: "11px", background: "rgba(175,154,201,0.18)", color: "#3a2d4a", border: "1px solid rgba(175,154,201,0.35)" }}>
@@ -138,7 +132,6 @@ function DnaPill({ label }) {
     );
 }
 
-// ─── Context badge chip ────────────────────────────────────────────────────────
 function ContextBadge({ label }) {
     return (
         <span style={{ display: "inline-flex", alignItems: "center", padding: "4px 10px", borderRadius: "999px", fontFamily: SANS, fontWeight: 500, fontSize: "11px", background: "rgba(165,147,123,0.14)", color: C.grayWarm, border: `1px solid rgba(165,147,123,0.28)` }}>
@@ -147,7 +140,6 @@ function ContextBadge({ label }) {
     );
 }
 
-// ─── Match card ────────────────────────────────────────────────────────────────
 function MatchCard({ match, onUnmatch }) {
     const [confirming,    setConfirming]    = useState(false);
     const [deleteLoading, setDeleteLoading] = useState(false);
@@ -196,7 +188,6 @@ function MatchCard({ match, onUnmatch }) {
             onMouseEnter={(e) => cardHover(e, true)}
             onMouseLeave={(e) => cardHover(e, false)}
         >
-            {/* Accent strip */}
             <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: "3px", background: `linear-gradient(to right, ${C.grayWarm}, ${C.tan}, ${C.lavender})` }} />
 
             {confirming && (
@@ -208,7 +199,6 @@ function MatchCard({ match, onUnmatch }) {
                 />
             )}
 
-            {/* Photo */}
             <div style={{ position: "relative", flexShrink: 0, width: "150px", minHeight: "200px", overflow: "hidden", background: `linear-gradient(135deg, ${C.grayWarm} 0%, #4d4949 100%)` }}>
                 {hasImg && (
                     <img src={profilePictureUrl} alt={fullName}
@@ -220,11 +210,9 @@ function MatchCard({ match, onUnmatch }) {
                         <span style={{ fontFamily: SERIF, fontSize: "2.5rem", color: C.beigeLight, opacity: 0.18, letterSpacing: "0.1em" }}>{inits}</span>
                     </div>
                 )}
-                {/* Score badge */}
                 <div style={{ position: "absolute", top: "10px", left: "10px", padding: "4px 10px", borderRadius: "999px", fontFamily: SANS, fontWeight: 700, fontSize: "11px", background: "rgba(255,255,255,0.90)", backdropFilter: "blur(6px)", color: scoreColor, border: `1.5px solid ${scoreColor}44` }}>
                     {compatibilityScore}%
                 </div>
-                {/* Super badge */}
                 {superLikeInvolved && (
                     <div style={{ position: "absolute", top: "10px", right: "10px", padding: "4px 10px", borderRadius: "999px", fontFamily: SANS, fontWeight: 700, fontSize: "10px", background: `linear-gradient(135deg, ${C.lavender} 0%, #9a88b8 100%)`, color: "#2d2040", border: "1px solid rgba(175,154,201,0.35)", boxShadow: `0 2px 0 #7d6a9e` }}>
                         Super
@@ -232,7 +220,6 @@ function MatchCard({ match, onUnmatch }) {
                 )}
             </div>
 
-            {/* Content */}
             <div style={{ flex: 1, display: "flex", flexDirection: "column", padding: "20px 22px", gap: "10px", minWidth: 0 }}>
                 <div>
                     <div style={{ display: "flex", alignItems: "baseline", gap: "8px", flexWrap: "wrap" }}>
@@ -293,7 +280,6 @@ function MatchCard({ match, onUnmatch }) {
 
                 {deleteError && <p style={{ fontFamily: SANS, fontSize: "11px", color: C.error, margin: 0 }}>{deleteError}</p>}
 
-                {/* Mobile footer */}
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", borderTop: `1px dashed ${C.tanBorder}`, paddingTop: "10px", marginTop: "auto" }} className="md:hidden">
                     <span style={{ fontFamily: SANS, fontWeight: 600, fontSize: "10px", textTransform: "uppercase", letterSpacing: "0.12em", color: C.tan }}>
                         {formatMatchedAt(matchedAt)}
@@ -308,7 +294,6 @@ function MatchCard({ match, onUnmatch }) {
                 </div>
             </div>
 
-            {/* Right stub — desktop only */}
             <div className="hidden md:flex" style={{ flexDirection: "column", alignItems: "center", justifyContent: "space-between", flexShrink: 0, width: "80px", padding: "20px 14px", background: C.beigeMid, position: "relative", backgroundImage: `linear-gradient(to bottom, ${C.tan} 50%, transparent 0%)`, backgroundPosition: "left", backgroundSize: "1px 8px", backgroundRepeat: "repeat-y" }}>
                 <div style={{ position: "absolute", left: "-10px", top: "20%", width: "20px", height: "20px", borderRadius: "50%", background: C.beigeLight, border: `1px solid ${C.tanBorder}` }} />
                 <div style={{ position: "absolute", left: "-10px", bottom: "20%", width: "20px", height: "20px", borderRadius: "50%", background: C.beigeLight, border: `1px solid ${C.tanBorder}` }} />
@@ -342,7 +327,6 @@ function MatchCard({ match, onUnmatch }) {
     );
 }
 
-// ─── MatchesPage ───────────────────────────────────────────────────────────────
 export default function MatchesPage({ onNavigate }) {
     const [matches,  setMatches]  = useState([]);
     const [loading,  setLoading]  = useState(true);
@@ -372,7 +356,6 @@ export default function MatchesPage({ onNavigate }) {
     return (
         <div style={{ display: "flex", flexDirection: "column", gap: "24px", paddingBottom: "32px", fontFamily: SANS }}>
 
-            {/* Header */}
             <section style={{ background: C.white, borderRadius: "20px", border: `1px solid ${C.tanBorder}`, boxShadow: `0 4px 0 #bfb9b4, 0 8px 28px rgba(165,147,123,0.10)`, overflow: "hidden" }}>
                 <div style={{ height: "100px", background: `linear-gradient(135deg, ${C.grayWarm} 0%, #575353 40%, #4d4949 100%)`, position: "relative", overflow: "hidden" }}>
                     <div style={{ position: "absolute", inset: 0, background: `linear-gradient(to bottom, transparent 40%, rgba(58,55,55,0.55) 100%)` }} />

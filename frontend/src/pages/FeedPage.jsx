@@ -4,14 +4,12 @@ import { saveProfile, unsaveProfile } from "../services/savedProfilesApi";
 import { postDiscoverEvent } from "../services/discoverApi";
 import { BookmarkIcon } from "../components/Icons";
 
-// ─── Swipe constants — unchanged ─────────────────────────────────────────────
 const SWIPE_THRESHOLD  = 75;
 const EXIT_DISTANCE    = 680;
 const EXIT_MS          = 380;
 const DOUBLE_TAP_MS    = 300;
 const ROTATION_MAX_DEG = 18;
 
-// ─── Palette ──────────────────────────────────────────────────────────────────
 const C = {
     beigeLight: "#E9E3DE",
     tan:        "#A5937B",
@@ -24,7 +22,6 @@ const C = {
 const SERIF = "'DM Serif Display', serif";
 const SANS  = "'DM Sans', sans-serif";
 
-// ─── Enum maps ────────────────────────────────────────────────────────────────
 const SOCIAL_BATTERY = { INTROVERT: "Introvert", AMBIVERT: "Ambivert", EXTROVERT: "Extrovert" };
 const PLANNING_STYLE = { SPONTANEOUS: "Spontaneous", FLEXIBLE: "Flexible", STRICT_ITINERARY: "Planner" };
 const BUDGET         = { BUDGET_FRIENDLY: "Budget", MODERATE: "Moderate", LUXURY: "Luxury" };
@@ -34,7 +31,6 @@ function initials(name = "") {
         .map((w) => w[0]?.toUpperCase() ?? "").join("");
 }
 
-// ─── Spinner ──────────────────────────────────────────────────────────────────
 function Spinner({ label = "Loading..." }) {
     return (
         <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "16px", padding: "80px 0" }}>
@@ -52,7 +48,6 @@ function Spinner({ label = "Loading..." }) {
     );
 }
 
-// ─── Pills ────────────────────────────────────────────────────────────────────
 function Pill({ label, variant = "activity" }) {
     const styles = {
         dna:      { background: "rgba(175,154,201,0.22)", color: C.beigeLight, border: "1px solid rgba(175,154,201,0.45)" },
@@ -73,7 +68,6 @@ function Pill({ label, variant = "activity" }) {
     );
 }
 
-// ─── Empty feed ───────────────────────────────────────────────────────────────
 function EmptyFeed({ onNavigate }) {
     return (
         <div style={{
@@ -121,7 +115,6 @@ function EmptyFeed({ onNavigate }) {
     );
 }
 
-// ─── Error state ──────────────────────────────────────────────────────────────
 function ErrorState({ message, onRetry }) {
     return (
         <div style={{
@@ -150,7 +143,6 @@ function ErrorState({ message, onRetry }) {
     );
 }
 
-// ─── Progress dots ────────────────────────────────────────────────────────────
 function ProgressDots({ total, current }) {
     const count  = Math.min(total, 5);
     const active = current % count;
@@ -169,7 +161,6 @@ function ProgressDots({ total, current }) {
     );
 }
 
-// ─── Profile card ─────────────────────────────────────────────────────────────
 function ProfileCard({
                          profile, dragX, isDragging, isExiting, exitDirection,
                          onPointerDown, onPointerMove, onPointerUp, onPointerCancel,
@@ -231,7 +222,6 @@ function ProfileCard({
                     : `0 6px 0 ${C.dark}, 0 16px 48px rgba(58,55,55,0.22), 0 6px 16px rgba(58,55,55,0.14)`,
             }}>
 
-                {/* Photo */}
                 {hasImg ? (
                     <img src={profilePictureUrl} alt={fullName} draggable={false}
                          style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", pointerEvents: "none" }}
@@ -249,27 +239,23 @@ function ProfileCard({
                     </div>
                 )}
 
-                {/* Bottom gradient */}
                 <div style={{
                     position: "absolute", inset: 0, pointerEvents: "none",
                     background: "linear-gradient(to top, rgba(58,55,55,0.96) 0%, rgba(58,55,55,0.55) 40%, rgba(58,55,55,0.08) 66%, transparent 100%)",
                 }} />
 
-                {/* YES indicator */}
                 <div style={{ position: "absolute", inset: 0, pointerEvents: "none", opacity: yesOp, display: "flex", alignItems: "flex-start", justifyContent: "flex-start", padding: "24px" }}>
                     <div style={{ fontFamily: SERIF, fontSize: "24px", color: "#7ec99a", border: "2.5px solid #7ec99a", background: "rgba(40,40,40,0.55)", backdropFilter: "blur(8px)", padding: "6px 16px", borderRadius: "12px", transform: "rotate(-10deg)" }}>
                         Yes
                     </div>
                 </div>
 
-                {/* PASS indicator */}
                 <div style={{ position: "absolute", inset: 0, pointerEvents: "none", opacity: noOp, display: "flex", alignItems: "flex-start", justifyContent: "flex-end", padding: "24px" }}>
                     <div style={{ fontFamily: SERIF, fontSize: "24px", color: "#d4847a", border: "2.5px solid #d4847a", background: "rgba(40,40,40,0.55)", backdropFilter: "blur(8px)", padding: "6px 16px", borderRadius: "12px", transform: "rotate(10deg)" }}>
                         Pass
                     </div>
                 </div>
 
-                {/* SUPER indicator */}
                 {superOn && (
                     <div style={{ position: "absolute", inset: 0, pointerEvents: "none", display: "flex", alignItems: "center", justifyContent: "center", background: "rgba(175,154,201,0.10)" }}>
                         <div style={{ fontFamily: SERIF, fontSize: "24px", color: C.lavender, border: `2.5px solid ${C.lavender}`, background: "rgba(40,40,40,0.55)", backdropFilter: "blur(8px)", padding: "8px 20px", borderRadius: "12px" }}>
@@ -278,7 +264,6 @@ function ProfileCard({
                     </div>
                 )}
 
-                {/* Score badge */}
                 {showScore && !isBack && (
                     <div style={{
                         position: "absolute", top: "16px", right: "16px",
@@ -296,7 +281,6 @@ function ProfileCard({
                     </div>
                 )}
 
-                {/* Save button */}
                 {!isBack && (
                     <button
                         type="button"
@@ -322,10 +306,8 @@ function ProfileCard({
                     </button>
                 )}
 
-                {/* Bottom overlay */}
                 <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, padding: "20px 20px 24px", display: "flex", flexDirection: "column", gap: "9px" }}>
 
-                    {/* Name row */}
                     <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: "8px" }}>
                         <div style={{ display: "flex", alignItems: "baseline", gap: "9px", minWidth: 0 }}>
                             <span style={{ fontFamily: SERIF, fontSize: "clamp(1.3rem,4vw,1.55rem)", color: C.beigeLight, letterSpacing: "-0.01em", lineHeight: 1.1, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
@@ -362,7 +344,6 @@ function ProfileCard({
                         )}
                     </div>
 
-                    {/* Location */}
                     {currentLocation && (
                         <div style={{ display: "flex", alignItems: "center", gap: "5px" }}>
                             <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="rgba(233,227,222,0.50)">
@@ -374,7 +355,6 @@ function ProfileCard({
                         </div>
                     )}
 
-                    {/* Bio */}
                     {bio && (
                         <p style={{
                             fontFamily: SANS, fontWeight: 400, fontSize: "13px",
@@ -385,7 +365,6 @@ function ProfileCard({
                         </p>
                     )}
 
-                    {/* Pills */}
                     <div style={{ display: "flex", flexWrap: "wrap", gap: "6px", alignItems: "center" }}>
                         {socialBattery && SOCIAL_BATTERY[socialBattery] && <Pill label={SOCIAL_BATTERY[socialBattery]} variant="dna" />}
                         {planningStyle  && PLANNING_STYLE[planningStyle]  && <Pill label={PLANNING_STYLE[planningStyle]}  variant="dna" />}
@@ -401,7 +380,6 @@ function ProfileCard({
     );
 }
 
-// ─── Raised action button ─────────────────────────────────────────────────────
 function ActionButton({ onClick, disabled, ariaLabel, size = 50, children, colorScheme = "neutral" }) {
     const schemes = {
         neutral: { bg: `linear-gradient(180deg, #767070 0%, ${C.grayWarm} 50%, #524f4f 100%)`, shadow: `0 5px 0 ${C.dark}, 0 8px 20px rgba(58,55,55,0.28)`, shadowDown: `0 1px 0 ${C.dark}, 0 2px 6px rgba(58,55,55,0.18)`, color: C.beigeLight, border: "1px solid rgba(255,255,255,0.10)" },
@@ -432,7 +410,6 @@ function ActionButton({ onClick, disabled, ariaLabel, size = 50, children, color
     );
 }
 
-// ─── Action bar ───────────────────────────────────────────────────────────────
 function ActionBar({ onPass, onSuper, onYes, disabled }) {
     return (
         <div style={{
@@ -461,7 +438,6 @@ function ActionBar({ onPass, onSuper, onYes, disabled }) {
     );
 }
 
-// ─── FeedPage ─────────────────────────────────────────────────────────────────
 export default function FeedPage({ onNavigate, onViewProfile }) {
     const [profiles, setProfiles]           = useState([]);
     const [currentIndex, setCurrentIndex]   = useState(0);
@@ -556,7 +532,6 @@ export default function FeedPage({ onNavigate, onViewProfile }) {
 
             <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "20px", paddingTop: "24px", fontFamily: SANS }}>
 
-                {/* Header */}
                 <div style={{ textAlign: "center" }}>
                     <h1 style={{ fontFamily: SERIF, fontSize: "clamp(1.7rem,4vw,2.1rem)", color: C.grayWarm, letterSpacing: "-0.01em", margin: 0, lineHeight: 1.1 }}>
                         Discover
@@ -566,7 +541,6 @@ export default function FeedPage({ onNavigate, onViewProfile }) {
                     </p>
                 </div>
 
-                {/* Card area */}
                 <div style={{ position: "relative", width: "100%", maxWidth: "400px", height: "clamp(500px, 68vh, 620px)", flexShrink: 0 }}>
                     {error ? (
                         <ErrorState message={error} onRetry={fetchFeed} />

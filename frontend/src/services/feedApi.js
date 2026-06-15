@@ -2,11 +2,6 @@ import TokenService from "./tokenService";
 
 const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
-/**
- * GET /feed
- * Returns an array of FeedItemDto for the logged-in user.
- * @returns {Promise<Array>}
- */
 export async function getFeed() {
     const response = await fetch(`${BASE_URL}/feed`, {
         method: "GET",
@@ -24,14 +19,7 @@ export async function getFeed() {
     return response.json();
 }
 
-/**
- * POST /feed/interact
- * Records the logged-in user's swipe decision on another profile.
- *
- * @param {string} targetUserId
- * @param {"YES" | "NO" | "SUPER_LIKE"} action
- * @returns {Promise<void>}
- */
+
 export async function postInteraction(targetUserId, action) {
     const response = await fetch(`${BASE_URL}/feed/interactions`, {
         method: "POST",
@@ -48,10 +36,6 @@ export async function postInteraction(targetUserId, action) {
     }
 }
 
-/**
- * Matches the same error-parsing pattern used elsewhere in the project.
- * Handles all Spring Boot error response shapes.
- */
 async function parseBackendError(response) {
     try {
         const data = await response.json();
@@ -61,7 +45,7 @@ async function parseBackendError(response) {
         const values = Object.values(data);
         if (values.length > 0)                return values.join(", ");
     } catch {
-        // non-JSON body
+
     }
     return "Something went wrong. Please try again.";
 }

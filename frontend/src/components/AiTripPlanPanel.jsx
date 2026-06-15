@@ -1,22 +1,6 @@
-/**
- * AiTripPlanPanel.jsx
- *
- * AI Trip Planner panel for Trip Room.
- * Any ACTIVE member can generate or regenerate the plan.
- * Plan is saved per trip in DB — all members see the same plan.
- * Receives WebSocket notifications when another member regenerates.
- *
- * Props:
- *   tripId            {number}   — required
- *   destinationCity   {string}
- *   destinationCountry{string}
- *   externalPlan      {object|null} — plan pushed via WebSocket from another member
- */
-
 import { useState, useEffect, useRef, useCallback } from "react";
 import { generateTripPlan, getTripPlan } from "../services/tripAiPlanApi";
 
-// ─── Design tokens — matches Travel Buddy palette exactly ─────────────────────
 const C = {
     beigeLight: "#E9E3DE",
     beigeMid:   "#faf8f6",
@@ -38,7 +22,6 @@ const SANS  = "'DM Sans', sans-serif";
 
 const MAX_PROMPT = 500;
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
 
 function formatDate(iso) {
     if (!iso) return "";
@@ -50,7 +33,6 @@ function formatDate(iso) {
     } catch { return ""; }
 }
 
-// ─── Spinner ──────────────────────────────────────────────────────────────────
 
 function Spinner({ size = 22, color = C.grayWarm, accent = C.lavender }) {
     return (
@@ -70,7 +52,6 @@ function Spinner({ size = 22, color = C.grayWarm, accent = C.lavender }) {
     );
 }
 
-// ─── Section divider ──────────────────────────────────────────────────────────
 
 function Divider({ label }) {
     return (
@@ -90,7 +71,6 @@ function Divider({ label }) {
     );
 }
 
-// ─── Activity row ─────────────────────────────────────────────────────────────
 
 function ActivityRow({ activity, index }) {
     const [expanded, setExpanded] = useState(false);
@@ -118,10 +98,8 @@ function ActivityRow({ activity, index }) {
                 e.currentTarget.style.boxShadow   = "none";
             }}
         >
-            {/* Top row */}
             <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "12px" }}>
                 <div style={{ display: "flex", alignItems: "flex-start", gap: "12px", flex: 1, minWidth: 0 }}>
-                    {/* Time badge */}
                     <div style={{
                         padding: "3px 10px",
                         borderRadius: "6px",
@@ -155,7 +133,6 @@ function ActivityRow({ activity, index }) {
                     </div>
                 </div>
 
-                {/* Chevron */}
                 <svg
                     xmlns="http://www.w3.org/2000/svg" width="14" height="14"
                     viewBox="0 0 24 24" fill="none" stroke={C.tan}
@@ -170,7 +147,6 @@ function ActivityRow({ activity, index }) {
                 </svg>
             </div>
 
-            {/* Expanded content */}
             {expanded && (
                 <div style={{
                     marginTop: "12px",
@@ -214,8 +190,6 @@ function ActivityRow({ activity, index }) {
         </div>
     );
 }
-
-// ─── Day card ─────────────────────────────────────────────────────────────────
 
 function DayCard({ day, isSelected, onClick }) {
     return (
@@ -281,7 +255,6 @@ function DayCard({ day, isSelected, onClick }) {
     );
 }
 
-// ─── Plan view ────────────────────────────────────────────────────────────────
 
 function PlanView({ plan }) {
     const [selectedDay, setSelectedDay] = useState(0);
@@ -293,7 +266,6 @@ function PlanView({ plan }) {
     return (
         <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
 
-            {/* Summary row */}
             <div style={{
                 padding: "16px 20px",
                 borderRadius: "14px",
@@ -331,7 +303,6 @@ function PlanView({ plan }) {
                 )}
             </div>
 
-            {/* Neighborhoods */}
             {neighborhoods.length > 0 && (
                 <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
                     {neighborhoods.map((n, i) => (
@@ -350,7 +321,6 @@ function PlanView({ plan }) {
                 </div>
             )}
 
-            {/* Day selector */}
             {days.length > 0 && (
                 <>
                     <div style={{ display: "flex", gap: "8px", overflowX: "auto", paddingBottom: "4px" }}>
@@ -364,7 +334,6 @@ function PlanView({ plan }) {
                         ))}
                     </div>
 
-                    {/* Day theme */}
                     {currentDay && (
                         <div>
                             <div style={{ display: "flex", alignItems: "baseline", gap: "12px", marginBottom: "14px" }}>
@@ -387,7 +356,6 @@ function PlanView({ plan }) {
                                 )}
                             </div>
 
-                            {/* Activities */}
                             <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
                                 {(currentDay.activities || []).map((act, i) => (
                                     <ActivityRow key={i} activity={act} index={i} />
@@ -439,7 +407,6 @@ function PlanView({ plan }) {
                 </>
             )}
 
-            {/* Generated by */}
             {plan.generatedByName && (
                 <p style={{
                     fontFamily: SANS, fontSize: "11px",
@@ -454,7 +421,6 @@ function PlanView({ plan }) {
     );
 }
 
-// ─── Loading skeleton ─────────────────────────────────────────────────────────
 
 function LoadingSkeleton() {
     return (
@@ -492,8 +458,6 @@ function LoadingSkeleton() {
         </>
     );
 }
-
-// ─── Generating animation ─────────────────────────────────────────────────────
 
 function GeneratingState({ destination }) {
     const steps = [
@@ -570,8 +534,6 @@ function GeneratingState({ destination }) {
     );
 }
 
-// ─── Empty state ──────────────────────────────────────────────────────────────
-
 function EmptyState({ destination, onStartGenerate }) {
     return (
         <div style={{
@@ -641,8 +603,6 @@ function EmptyState({ destination, onStartGenerate }) {
         </div>
     );
 }
-
-// ─── Generate form ────────────────────────────────────────────────────────────
 
 function GenerateForm({ onGenerate, onCancel, isRegenerate, loading }) {
     const [prompt, setPrompt] = useState("");
@@ -774,16 +734,6 @@ function GenerateForm({ onGenerate, onCancel, isRegenerate, loading }) {
     );
 }
 
-// ─── AiTripPlanPanel ──────────────────────────────────────────────────────────
-
-/**
- * @param {{
- *   tripId: number,
- *   destinationCity?: string,
- *   destinationCountry?: string,
- *   externalPlan?: object|null
- * }} props
- */
 export default function AiTripPlanPanel({
                                             tripId,
                                             destinationCity,
@@ -791,8 +741,6 @@ export default function AiTripPlanPanel({
                                             externalPlan = null,
                                         }) {
     const destination = [destinationCity, destinationCountry].filter(Boolean).join(", ");
-
-    // "idle" | "loading-existing" | "generating" | "show-form" | "show-plan" | "error"
     const [uiState, setUiState]     = useState("loading-existing");
     const [plan,    setPlan]        = useState(null);
     const [error,   setError]       = useState(null);
@@ -800,7 +748,6 @@ export default function AiTripPlanPanel({
 
     const isMounted = useRef(true);
 
-    // ── Load existing plan on mount ──────────────────────────────────────────
     useEffect(() => {
         isMounted.current = true;
         let cancelled = false;
@@ -816,7 +763,6 @@ export default function AiTripPlanPanel({
             })
             .catch(() => {
                 if (cancelled) return;
-                // No plan yet — show empty state
                 setUiState("idle");
             });
 
@@ -826,7 +772,6 @@ export default function AiTripPlanPanel({
         };
     }, [tripId]);
 
-    // ── React to WebSocket plan broadcast ───────────────────────────────────
     useEffect(() => {
         if (!externalPlan) return;
         setPlan(externalPlan.plan || externalPlan);
@@ -839,7 +784,6 @@ export default function AiTripPlanPanel({
         return () => clearTimeout(timer);
     }, [externalPlan]);
 
-    // ── Generate / regenerate ────────────────────────────────────────────────
     const handleGenerate = useCallback(async (prompt) => {
         if (!isMounted.current) return;
         setUiState("generating");
@@ -857,7 +801,6 @@ export default function AiTripPlanPanel({
         }
     }, [tripId]);
 
-    // ─────────────────────────────────────────────────────────────────────────
     return (
         <section style={{
             background: C.white,
@@ -867,13 +810,11 @@ export default function AiTripPlanPanel({
             overflow: "hidden",
             fontFamily: SANS,
         }}>
-            {/* Accent strip */}
             <div style={{
                 height: "2px",
                 background: `linear-gradient(to right, ${C.grayWarm}, ${C.tan}, ${C.lavender})`,
             }} />
 
-            {/* ── Header ──────────────────────────────────────────────────── */}
             <div style={{
                 padding: "16px 20px 14px",
                 borderBottom: `1px solid ${C.tanBorder}`,
@@ -905,7 +846,6 @@ export default function AiTripPlanPanel({
                     </p>
                 </div>
 
-                {/* Regenerate button — shown when plan exists and not already in form/generating */}
                 {(uiState === "show-plan") && (
                     <button
                         onClick={() => setUiState("show-form")}
@@ -942,7 +882,6 @@ export default function AiTripPlanPanel({
                 )}
             </div>
 
-            {/* ── New plan notification banner ─────────────────────────────── */}
             {newPlanBanner && (
                 <div style={{
                     display: "flex", alignItems: "center", gap: "10px",
@@ -977,15 +916,12 @@ export default function AiTripPlanPanel({
                 </div>
             )}
 
-            {/* ── Body ────────────────────────────────────────────────────── */}
             <div style={{ padding: "20px 20px 24px" }}>
 
-                {/* Loading existing */}
                 {uiState === "loading-existing" && (
                     <LoadingSkeleton />
                 )}
 
-                {/* Empty — no plan yet */}
                 {uiState === "idle" && (
                     <EmptyState
                         destination={destination}
@@ -993,7 +929,6 @@ export default function AiTripPlanPanel({
                     />
                 )}
 
-                {/* Generate form — first time */}
                 {uiState === "show-form" && !plan && (
                     <GenerateForm
                         onGenerate={handleGenerate}
@@ -1003,7 +938,6 @@ export default function AiTripPlanPanel({
                     />
                 )}
 
-                {/* Regenerate form — plan exists, user clicked regenerate */}
                 {uiState === "show-form" && plan && (
                     <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
                         <GenerateForm
@@ -1017,17 +951,14 @@ export default function AiTripPlanPanel({
                     </div>
                 )}
 
-                {/* Generating animation */}
                 {uiState === "generating" && (
                     <GeneratingState destination={destination} />
                 )}
 
-                {/* Plan view */}
                 {uiState === "show-plan" && plan && (
                     <PlanView plan={plan} />
                 )}
 
-                {/* Error */}
                 {uiState === "error" && (
                     <div style={{
                         display: "flex", flexDirection: "column",

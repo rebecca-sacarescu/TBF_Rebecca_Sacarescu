@@ -1,7 +1,3 @@
-// CountdownBadge.jsx — new component
-// Raised pill badge showing trip countdown.
-// Props: countdown object from TripCardResponseDto
-
 const C = {
     beigeLight: "#E9E3DE",
     tan:        "#A5937B",
@@ -12,9 +8,6 @@ const C = {
 };
 const SANS = "'DM Sans', sans-serif";
 
-/**
- * @param {{ countdown: { daysUntilStart:number, startsToday:boolean, alreadyStarted:boolean, label:string } }} props
- */
 export default function CountdownBadge({ countdown }) {
     if (!countdown) return null;
 

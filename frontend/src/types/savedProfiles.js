@@ -14,7 +14,5 @@
  * @property {string}  savedAt            - ISO 8601 date-time string
  */
 
-// ASSUMPTION: savedAt is ISO 8601 as returned by the backend.
-// Save does not create a match and does not remove the profile from feed.
-// A NO interaction will auto-remove the profile from saved_profiles on backend.
+
 export {};

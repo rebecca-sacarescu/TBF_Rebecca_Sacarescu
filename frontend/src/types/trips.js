@@ -10,12 +10,12 @@
  * @property {string} title
  * @property {string} destinationCity
  * @property {string} destinationCountry
- * @property {string} startDate        — ISO date string "YYYY-MM-DD"
- * @property {string} endDate          — ISO date string "YYYY-MM-DD"
+ * @property {string} startDate
+ * @property {string} endDate
  * @property {Budget} budget
  * @property {TripType} tripType
  * @property {string} description
- * @property {number} targetGroupSize  — >= 2, includes owner
+ * @property {number} targetGroupSize
  */
 
 /**

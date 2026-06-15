@@ -30,7 +30,5 @@
  * @property {number} [dwellTimeMs] - Only for DWELL_RECORDED events
  */
 
-// ASSUMPTION: all fields above are returned by GET /discover/{targetUserId}.
-// `saved` reflects current user's saved state and is used for toggle UI.
-// Events are fire-and-forget and never block navigation.
+
 export {};

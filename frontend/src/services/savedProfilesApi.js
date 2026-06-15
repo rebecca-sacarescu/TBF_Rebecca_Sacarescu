@@ -2,11 +2,6 @@ import TokenService from "./tokenService";
 
 const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
-/**
- * GET /saved-profiles
- * Returns all profiles saved by the logged-in user.
- * @returns {Promise<import("../types/savedProfiles").SavedProfileDto[]>}
- */
 export async function getSavedProfiles() {
     const response = await fetch(`${BASE_URL}/saved-profiles`, {
         method: "GET",
@@ -24,12 +19,6 @@ export async function getSavedProfiles() {
     return response.json();
 }
 
-/**
- * POST /saved-profiles/{targetUserId}
- * Saves a profile. Save does not create a match and does not remove from feed.
- * @param {number} targetUserId
- * @returns {Promise<void>}
- */
 export async function saveProfile(targetUserId) {
     const response = await fetch(`${BASE_URL}/saved-profiles/${targetUserId}`, {
         method: "POST",
@@ -45,12 +34,6 @@ export async function saveProfile(targetUserId) {
     }
 }
 
-/**
- * DELETE /saved-profiles/{targetUserId}
- * Removes a saved profile.
- * @param {number} targetUserId
- * @returns {Promise<void>}
- */
 export async function unsaveProfile(targetUserId) {
     const response = await fetch(`${BASE_URL}/saved-profiles/${targetUserId}`, {
         method: "DELETE",
@@ -75,7 +58,6 @@ async function parseBackendError(response) {
         const values = Object.values(data);
         if (values.length > 0)                return values.join(", ");
     } catch {
-        // non-JSON body
     }
     return "Something went wrong. Please try again.";
 }

@@ -11,7 +11,6 @@ async function parseBackendError(response) {
         const values = Object.values(data);
         if (values.length > 0) return values.join(", ");
     } catch {
-        // non-JSON body
     }
     return "Something went wrong. Please try again.";
 }
@@ -23,10 +22,6 @@ function authHeaders() {
     };
 }
 
-/**
- * POST /trips
- * Creates a new trip. Owner is derived from JWT.
- */
 export async function createTrip(data) {
     const response = await fetch(`${BASE_URL}/trips`, {
         method: "POST",
@@ -40,9 +35,6 @@ export async function createTrip(data) {
     return response.json();
 }
 
-/**
- * GET /trips/joinable
- */
 export async function getJoinableTrips() {
     const response = await fetch(`${BASE_URL}/trips/joinable`, {
         method: "GET",
@@ -55,9 +47,6 @@ export async function getJoinableTrips() {
     return response.json();
 }
 
-/**
- * GET /trips/mine/created
- */
 export async function getMyCreatedTrips() {
     const response = await fetch(`${BASE_URL}/trips/mine/created`, {
         method: "GET",
@@ -70,9 +59,6 @@ export async function getMyCreatedTrips() {
     return response.json();
 }
 
-/**
- * GET /trips/mine/joined
- */
 export async function getMyJoinedTrips() {
     const response = await fetch(`${BASE_URL}/trips/mine/joined`, {
         method: "GET",
@@ -85,9 +71,6 @@ export async function getMyJoinedTrips() {
     return response.json();
 }
 
-/**
- * POST /trips/{tripId}/join-requests
- */
 export async function requestToJoinTrip(tripId, data) {
     const response = await fetch(`${BASE_URL}/trips/${tripId}/join-requests`, {
         method: "POST",
@@ -101,9 +84,6 @@ export async function requestToJoinTrip(tripId, data) {
     return response.json();
 }
 
-/**
- * GET /trips/{tripId}/join-requests
- */
 export async function getTripJoinRequests(tripId) {
     const response = await fetch(`${BASE_URL}/trips/${tripId}/join-requests`, {
         method: "GET",
@@ -116,9 +96,6 @@ export async function getTripJoinRequests(tripId) {
     return response.json();
 }
 
-/**
- * POST /trips/{tripId}/join-requests/{requestId}/approve
- */
 export async function approveJoinRequest(tripId, requestId) {
     const response = await fetch(
         `${BASE_URL}/trips/${tripId}/join-requests/${requestId}/approve`,
@@ -130,9 +107,6 @@ export async function approveJoinRequest(tripId, requestId) {
     }
 }
 
-/**
- * POST /trips/{tripId}/join-requests/{requestId}/reject
- */
 export async function rejectJoinRequest(tripId, requestId) {
     const response = await fetch(
         `${BASE_URL}/trips/${tripId}/join-requests/${requestId}/reject`,
@@ -144,21 +118,6 @@ export async function rejectJoinRequest(tripId, requestId) {
     }
 }
 
-// ─── NEW: Crew Insights ───────────────────────────────────────────────────────
-
-/**
- * GET /trips/{tripId}/crew-insights
- * Returns group dynamics and crew insights for a specific trip.
- * @param {number} tripId
- * @returns {Promise<{
- *   groupSize: number, targetGroupSize: number, spotsLeft: number,
- *   dominantBudget: string, dominantPlanningStyle: string, dominantSocialBattery: string,
- *   topLanguages: {name:string, count:number}[],
- *   topActivities: {name:string, count:number}[],
- *   groupVibe: string,
- *   insights: string[]
- * }>}
- */
 export async function getCrewInsights(tripId) {
     const response = await fetch(`${BASE_URL}/trips/${tripId}/crew-insights`, {
         method: "GET",

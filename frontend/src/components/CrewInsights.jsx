@@ -1,6 +1,3 @@
-// CrewInsights.jsx — new component
-// Fetches and displays crew dynamics for a trip.
-// Fade-in animation on mount.
 
 import { useState, useEffect } from "react";
 import { getCrewInsights } from "../services/tripsApi";
@@ -58,9 +55,7 @@ function Spinner() {
     );
 }
 
-/**
- * @param {{ tripId: number }} props
- */
+
 export default function CrewInsights({ tripId }) {
     const [data,    setData]    = useState(null);
     const [loading, setLoading] = useState(true);
@@ -115,7 +110,6 @@ export default function CrewInsights({ tripId }) {
             {!loading && !error && data && (
                 <div style={{ display: "flex", flexDirection: "column", gap: "22px" }}>
 
-                    {/* Group vibe */}
                     {data.groupVibe && (
                         <div style={{ padding: "16px 18px", borderRadius: "14px", background: C.beigeMid, border: `1px solid ${C.tanBorder}`, boxShadow: `0 2px 0 #d4cec9` }}>
                             <p style={{ fontFamily: SANS, fontWeight: 700, fontSize: "9px", textTransform: "uppercase", letterSpacing: "0.18em", color: C.tan, margin: "0 0 6px" }}>Group Vibe</p>
@@ -125,7 +119,6 @@ export default function CrewInsights({ tripId }) {
                         </div>
                     )}
 
-                    {/* DNA chips */}
                     {(data.dominantBudget || data.dominantPlanningStyle || data.dominantSocialBattery) && (
                         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(130px, 1fr))", gap: "10px" }}>
                             {data.dominantBudget        && <DnaChip label={BUDGET_LABELS[data.dominantBudget]        ?? data.dominantBudget}        sub="Budget" />}
@@ -134,7 +127,6 @@ export default function CrewInsights({ tripId }) {
                         </div>
                     )}
 
-                    {/* Insights list */}
                     {data.insights?.length > 0 && (
                         <div>
                             <p style={{ fontFamily: SANS, fontWeight: 700, fontSize: "9px", textTransform: "uppercase", letterSpacing: "0.18em", color: C.tan, margin: "0 0 10px" }}>Insights</p>
@@ -149,7 +141,6 @@ export default function CrewInsights({ tripId }) {
                         </div>
                     )}
 
-                    {/* Languages + Activities */}
                     <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "18px" }}>
                         {data.topLanguages?.length > 0 && (
                             <div>

@@ -1,7 +1,3 @@
-/**
- * WeatherIcon.jsx
- * Inline SVG icons for weather states: sun, cloud-sun, cloud, rain, snow, storm
- */
 
 const C = {
     sun:    "#E3C49B",

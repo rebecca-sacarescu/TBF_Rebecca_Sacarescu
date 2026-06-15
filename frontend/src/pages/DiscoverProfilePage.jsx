@@ -5,7 +5,6 @@ import { postInteraction } from "../services/feedApi";
 import TagList from "../components/TagList";
 import { ChevronLeftIcon, BookmarkIcon, VerifiedIcon } from "../components/Icons";
 
-// ─── Palette ──────────────────────────────────────────────────────────────────
 const C = {
     beigeLight: "#E9E3DE",
     beigeMid:   "#faf8f6",
@@ -21,7 +20,6 @@ const C = {
 const SERIF = "'DM Serif Display', serif";
 const SANS  = "'DM Sans', sans-serif";
 
-// ─── Enum maps — unchanged ────────────────────────────────────────────────────
 const SOCIAL_BATTERY  = { INTROVERT: "Introvert", AMBIVERT: "Ambivert",    EXTROVERT: "Extrovert" };
 const PLANNING_STYLE  = { SPONTANEOUS: "Spontaneous", FLEXIBLE: "Flexible", STRICT_ITINERARY: "Planner" };
 const BUDGET          = { BUDGET_FRIENDLY: "Budget", MODERATE: "Moderate",  LUXURY: "Luxury" };
@@ -30,7 +28,6 @@ function getInitials(name = "") {
     return name.trim().split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0]?.toUpperCase() ?? "").join("");
 }
 
-// ─── Spinner ──────────────────────────────────────────────────────────────────
 function Spinner() {
     return (
         <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "14px", padding: "80px 0", fontFamily: SANS }}>
@@ -43,7 +40,6 @@ function Spinner() {
     );
 }
 
-// ─── DNA pill ─────────────────────────────────────────────────────────────────
 function DnaPill({ label }) {
     return (
         <span style={{
@@ -58,8 +54,6 @@ function DnaPill({ label }) {
         </span>
     );
 }
-
-// ─── Section card ─────────────────────────────────────────────────────────────
 function SectionCard({ title, children }) {
     return (
         <section style={{
@@ -78,7 +72,6 @@ function SectionCard({ title, children }) {
     );
 }
 
-// ─── Raised action button ─────────────────────────────────────────────────────
 function ActionButton({ onClick, disabled, ariaLabel, size = 50, children, colorScheme = "neutral" }) {
     const schemes = {
         neutral: { bg: `linear-gradient(180deg, #767070 0%, ${C.grayWarm} 50%, #524f4f 100%)`, shadow: `0 5px 0 ${C.dark}, 0 8px 20px rgba(58,55,55,0.22)`, shadowDown: `0 1px 0 ${C.dark}`, color: C.beigeLight, border: "1px solid rgba(255,255,255,0.10)" },
@@ -114,7 +107,6 @@ function ActionButton({ onClick, disabled, ariaLabel, size = 50, children, color
     );
 }
 
-// ─── DiscoverProfilePage ──────────────────────────────────────────────────────
 export default function DiscoverProfilePage({ profileId, fromPage = "feed", onNavigate }) {
     const [profile,     setProfile]     = useState(null);
     const [loading,     setLoading]     = useState(true);
@@ -125,7 +117,6 @@ export default function DiscoverProfilePage({ profileId, fromPage = "feed", onNa
 
     const dwellStartRef = useRef(Date.now());
 
-    // ── Fetch + dwell — unchanged ─────────────────────────────────────────────
     useEffect(() => {
         if (!profileId) return;
         let cancelled = false;
@@ -201,29 +192,24 @@ export default function DiscoverProfilePage({ profileId, fromPage = "feed", onNa
     return (
         <div style={{ display: "flex", flexDirection: "column", gap: "16px", paddingBottom: "32px", fontFamily: SANS }}>
 
-            {/* ── Hero ──────────────────────────────────────────────────────── */}
             <section style={{
                 background: C.white, borderRadius: "20px",
                 border: `1px solid ${C.tanBorder}`,
                 boxShadow: `0 4px 0 #bfb9b4, 0 8px 28px rgba(165,147,123,0.10)`,
                 overflow: "hidden",
             }}>
-                {/* Cover strip */}
                 <div style={{
                     height: "160px", width: "100%", position: "relative", overflow: "hidden",
                     background: `linear-gradient(135deg, ${C.grayWarm} 0%, #575353 40%, #4d4949 100%)`,
                 }}>
-                    {/* Subtle pattern */}
                     <div style={{ position: "absolute", inset: 0, background: `linear-gradient(to bottom, transparent 50%, rgba(58,55,55,0.45) 100%)` }} />
                     <div style={{ position: "absolute", right: "24px", top: "50%", transform: "translateY(-50%)", opacity: 0.06, pointerEvents: "none" }}>
                         <svg xmlns="http://www.w3.org/2000/svg" width="110" height="110" viewBox="0 0 24 24" fill={C.beigeLight}>
                             <path d="M2.5 19h19v2h-19v-2zm19.57-9.36c-.21-.8-1.04-1.28-1.84-1.06L14.92 10l-6.9-6.43-1.93.51 4.14 7.17-4.97 1.33-1.97-1.54-1.45.39 2.59 4.49L21 11.49c.81-.23 1.28-1.05 1.07-1.85z"/>
                         </svg>
                     </div>
-                    {/* Accent strip bottom */}
                     <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: "2px", background: `linear-gradient(to right, ${C.grayWarm}, ${C.tan}, ${C.lavender})` }} />
 
-                    {/* Back button */}
                     <button
                         onClick={handleBack}
                         style={{
@@ -244,7 +230,6 @@ export default function DiscoverProfilePage({ profileId, fromPage = "feed", onNa
                         Back
                     </button>
 
-                    {/* Save button */}
                     <button
                         onClick={handleToggleSave}
                         disabled={savingState}
@@ -268,9 +253,7 @@ export default function DiscoverProfilePage({ profileId, fromPage = "feed", onNa
                     </button>
                 </div>
 
-                {/* Profile info */}
                 <div style={{ padding: "0 24px 24px", display: "flex", flexWrap: "wrap", alignItems: "flex-end", gap: "16px 20px", marginTop: "-52px", position: "relative", zIndex: 1 }}>
-                    {/* Avatar */}
                     <div style={{ position: "relative", flexShrink: 0 }}>
                         <div style={{
                             width: "96px", height: "96px", borderRadius: "16px",
@@ -344,10 +327,8 @@ export default function DiscoverProfilePage({ profileId, fromPage = "feed", onNa
                 </div>
             </section>
 
-            {/* ── Bio ───────────────────────────────────────────────────────── */}
             {bio && (
                 <SectionCard title="About">
-                    {/* Mini barcode decoration */}
                     <div style={{ display: "flex", gap: "2px", marginBottom: "14px", opacity: 0.18 }}>
                         {[0.5,1,0.5,2,0.5,1.5,1,0.5].map((w, i) => (
                             <div key={i} style={{ background: C.grayWarm, width: `${w*3}px`, height: "16px", borderRadius: "1px" }} />
@@ -359,7 +340,6 @@ export default function DiscoverProfilePage({ profileId, fromPage = "feed", onNa
                 </SectionCard>
             )}
 
-            {/* ── Travel DNA ────────────────────────────────────────────────── */}
             {(socialBattery || planningStyle || budget) && (
                 <SectionCard title="Travel DNA">
                     <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
@@ -370,7 +350,6 @@ export default function DiscoverProfilePage({ profileId, fromPage = "feed", onNa
                 </SectionCard>
             )}
 
-            {/* ── Interests ─────────────────────────────────────────────────── */}
             {(activities.length > 0 || destinationTypes.length > 0 || experienceTypes.length > 0 ||
                 languages.length > 0 || lookingForWho.length > 0 || lookingForWhat.length > 0) && (
                 <SectionCard title="Interests & Preferences">
@@ -389,14 +368,12 @@ export default function DiscoverProfilePage({ profileId, fromPage = "feed", onNa
                 </SectionCard>
             )}
 
-            {/* ── Action bar ────────────────────────────────────────────────── */}
             <div style={{
                 background: C.white, borderRadius: "20px",
                 border: `1px solid ${C.tanBorder}`,
                 boxShadow: `0 4px 0 #bfb9b4, 0 8px 28px rgba(165,147,123,0.10)`,
                 padding: "20px 28px 24px",
             }}>
-                {/* Perforation line */}
                 <div style={{ position: "relative", display: "flex", alignItems: "center", marginBottom: "18px" }}>
                     <div style={{ position: "absolute", left: "-28px", width: "18px", height: "18px", borderRadius: "50%", background: C.beigeLight, border: `1px solid ${C.tanBorder}` }} />
                     <div style={{ flex: 1, borderTop: `1.5px dashed ${C.tanBorder}` }} />
@@ -407,7 +384,6 @@ export default function DiscoverProfilePage({ profileId, fromPage = "feed", onNa
                     Your decision
                 </p>
 
-                {/* Buttons container — same raised pill as Feed */}
                 <div style={{
                     display: "flex", alignItems: "center", justifyContent: "center", gap: "14px",
                     padding: "12px 18px", borderRadius: "999px",

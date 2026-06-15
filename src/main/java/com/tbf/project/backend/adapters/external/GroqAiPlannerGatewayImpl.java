@@ -15,16 +15,16 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Component
-public class GeminiAiPlannerGatewayImpl implements AiPlannerGateway {
+public class GroqAiPlannerGatewayImpl implements AiPlannerGateway {
 
-    private static final String GEMINI_URL =
-            "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=";
+    private static final String GROQ_URL = "https://api.groq.com/openai/v1/chat/completions";
+    private static final String MODEL = "llama-3.3-70b-versatile";
 
-    @Value("${gemini.api.key}")
+    @Value("${groq.api.key}")
     private String apiKey;
 
     private final HttpClient httpClient = HttpClient.newBuilder()
-            .connectTimeout(Duration.ofSeconds(30))
+            .connectTimeout(Duration.ofSeconds(15))
             .build();
 
     private final ObjectMapper objectMapper = new ObjectMapper();
@@ -43,70 +43,64 @@ public class GeminiAiPlannerGatewayImpl implements AiPlannerGateway {
             String requestBody = buildRequestBody(prompt);
 
             HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create(GEMINI_URL + apiKey))
+                    .uri(URI.create(GROQ_URL))
                     .header("Content-Type", "application/json")
+                    .header("Authorization", "Bearer " + apiKey)
                     .POST(HttpRequest.BodyPublishers.ofString(requestBody))
-                    .timeout(Duration.ofSeconds(90))
+                    .timeout(Duration.ofSeconds(30))
                     .build();
 
             HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
 
             if (response.statusCode() != 200) {
-                throw new RuntimeException("Gemini API error: HTTP " + response.statusCode() + " — " + response.body());
+                throw new RuntimeException("Groq API error: HTTP " + response.statusCode() + " — " + response.body());
             }
 
             String planJson = extractPlanJson(response.body());
-
             responseCache.put(cacheKey, planJson);
-
             return planJson;
 
         } catch (RuntimeException e) {
             throw e;
         } catch (Exception e) {
-            throw new RuntimeException("Failed to call Gemini API", e);
+            throw new RuntimeException("Failed to call Groq API", e);
         }
     }
 
     private String buildRequestBody(String prompt) throws Exception {
         var root = objectMapper.createObjectNode();
-        var contentsArray = root.putArray("contents");
-        var contentNode = contentsArray.addObject();
-        var partsArray = contentNode.putArray("parts");
-        partsArray.addObject().put("text", prompt);
+        root.put("model", MODEL);
+        root.put("temperature", 0.3);
+        root.put("max_tokens", 2000);
 
-        var genConfig = root.putObject("generationConfig");
-        genConfig.put("temperature", 0.3);
-        genConfig.put("maxOutputTokens", 3000);
+        var messages = root.putArray("messages");
+
+        var system = messages.addObject();
+        system.put("role", "system");
+        system.put("content", "You are a travel planner. You respond ONLY with valid JSON. No markdown, no explanation, no text before or after the JSON object.");
+
+        var user = messages.addObject();
+        user.put("role", "user");
+        user.put("content", prompt);
 
         return objectMapper.writeValueAsString(root);
     }
 
-    private String extractPlanJson(String geminiResponse) throws Exception {
-        JsonNode root = objectMapper.readTree(geminiResponse);
+    private String extractPlanJson(String groqResponse) throws Exception {
+        JsonNode root = objectMapper.readTree(groqResponse);
         String rawText = root
-                .path("candidates")
+                .path("choices")
                 .path(0)
+                .path("message")
                 .path("content")
-                .path("parts")
-                .path(0)
-                .path("text")
                 .asText("");
 
         if (rawText.isBlank()) {
-            // Verifica daca Gemini a oprit generarea din cauza token limit
-            String finishReason = root
-                    .path("candidates")
-                    .path(0)
-                    .path("finishReason")
-                    .asText("");
-            if ("MAX_TOKENS".equals(finishReason)) {
-                throw new RuntimeException("Response truncated — increase maxOutputTokens");
-            }
-            throw new RuntimeException("Gemini returned empty response");
+            throw new RuntimeException("Groq returned empty response");
         }
 
         String cleaned = rawText.trim();
+
         if (cleaned.startsWith("```")) {
             cleaned = cleaned.replaceAll("^```[a-zA-Z]*\\n?", "").replaceAll("```$", "").trim();
         }
@@ -114,7 +108,7 @@ public class GeminiAiPlannerGatewayImpl implements AiPlannerGateway {
         try {
             objectMapper.readTree(cleaned);
         } catch (Exception e) {
-            throw new RuntimeException("Gemini returned invalid or truncated JSON. Try again.", e);
+            throw new RuntimeException("Groq returned invalid JSON. Try again.", e);
         }
 
         return cleaned;

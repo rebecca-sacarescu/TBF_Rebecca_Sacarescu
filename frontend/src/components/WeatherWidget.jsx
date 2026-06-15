@@ -1,13 +1,3 @@
-/**
- * WeatherWidget.jsx
- *
- * 7-day weather forecast panel for Trip Room.
- * Uses Open-Meteo — no API key, CORS ok.
- *
- * Props:
- *   destinationCity     {string}
- *   destinationCountry  {string}
- */
 
 import { useState, useEffect } from "react";
 import { geocodeCity, getWeeklyForecast } from "../services/weatherApi";
@@ -98,10 +88,8 @@ export default function WeatherWidget({ destinationCity, destinationCountry }) {
             overflow: "hidden",
             fontFamily: SANS,
         }}>
-            {/* Accent strip */}
             <div style={{ height: "2px", background: `linear-gradient(to right, ${C.grayWarm}, ${C.tan}, ${C.lavender})` }} />
 
-            {/* Header */}
             <div style={{
                 padding: "16px 20px 14px",
                 borderBottom: `1px solid ${C.tanBorder}`,
@@ -129,7 +117,6 @@ export default function WeatherWidget({ destinationCity, destinationCountry }) {
                 </div>
             </div>
 
-            {/* Body */}
             <div style={{ padding: "16px 20px 20px" }}>
 
                 {loading && <Skeleton />}
@@ -143,7 +130,6 @@ export default function WeatherWidget({ destinationCity, destinationCountry }) {
                 {!loading && !error && forecast && (
                     <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
 
-                        {/* Selected day detail */}
                         {selected && (
                             <div style={{
                                 display: "flex", alignItems: "center", gap: "16px",
@@ -176,7 +162,6 @@ export default function WeatherWidget({ destinationCity, destinationCountry }) {
                             </div>
                         )}
 
-                        {/* 7-day strip */}
                         <div style={{ display: "flex", gap: "6px", overflowX: "auto", paddingBottom: "4px" }}>
                             {forecast.map((day, i) => {
                                 const isSelected = i === selectedDay;

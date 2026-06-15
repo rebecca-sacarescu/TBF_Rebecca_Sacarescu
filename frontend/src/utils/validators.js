@@ -1,7 +1,6 @@
 export const validators = {
     email: (v) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v),
 
-    /** Username: letters, numbers, dots, dashes, underscores — 3 to 30 chars */
     username: (v) => /^[a-zA-Z0-9._-]{3,30}$/.test(v),
 
     password: {
@@ -10,7 +9,6 @@ export const validators = {
         lowercase: (v) => /[a-z]/.test(v),
         digit: (v) => /\d/.test(v),
         special: (v) => /[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/.test(v),
-        /** Check ALL rules at once */
         all: (v) =>
             v.length >= 8 &&
             /[A-Z]/.test(v) &&

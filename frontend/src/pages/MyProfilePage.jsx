@@ -3,7 +3,6 @@ import profileApi, { parseApiError } from "../services/profileApi";
 import DnaSelector from "../components/DnaSelector";
 import TagList from "../components/TagList";
 
-/* ── DNA option configs ── */
 const SOCIAL_BATTERY_OPTIONS = [
     { value: "INTROVERT", label: "Introvert" },
     { value: "AMBIVERT", label: "Ambivert" },
@@ -22,7 +21,6 @@ const BUDGET_OPTIONS = [
 
 const GENDER_OPTIONS = ["Male", "Female", "Non-binary", "Prefer not to say"];
 
-/** Format LocalDate for display: "12 May 1992" */
 function formatDate(dateStr) {
     if (!dateStr) return "—";
     try {
@@ -42,7 +40,6 @@ export default function MyProfilePage({ onAuthError }) {
     const [error, setError] = useState("");
     const [saveSuccess, setSaveSuccess] = useState(false);
 
-    /* ── Load profile ── */
     useEffect(() => {
         loadProfile();
     }, []);
@@ -56,12 +53,10 @@ export default function MyProfilePage({ onAuthError }) {
             setForm(buildForm(data));
         } catch (err) {
             if (err?.status === 401 || err?.status === 403) {
-                // Token expired or invalid — force back to login
                 onAuthError?.();
                 return;
             }
             if (err?.status === 404 || err?.status === 400) {
-                // Profile doesn't exist yet — show empty edit mode
                 setProfile(null);
                 setForm(emptyForm());
                 setEditing(true);
@@ -105,7 +100,7 @@ export default function MyProfilePage({ onAuthError }) {
         setForm((p) => ({ ...p, [field]: value }));
     };
 
-    /* ── Save ── */
+
     const handleSave = async () => {
         setSaving(true);
         setError("");
@@ -114,10 +109,8 @@ export default function MyProfilePage({ onAuthError }) {
             const payload = { ...form };
             let data;
             if (!profile) {
-                // First time — POST
                 data = await profileApi.createProfile(payload);
             } else {
-                // Update — PUT
                 data = await profileApi.updateProfile(payload);
             }
             setProfile(data);
@@ -144,7 +137,6 @@ export default function MyProfilePage({ onAuthError }) {
         }
     };
 
-    /* ── Loading state ── */
     if (loading) {
         return (
             <div className="flex items-center justify-center py-32">
@@ -161,9 +153,7 @@ export default function MyProfilePage({ onAuthError }) {
 
     return (
         <div className="space-y-8">
-            {/* ═══ HERO SECTION ═══ */}
             <section className="relative rounded-xl overflow-hidden" style={{ background: "#ffffff", border: "1px solid rgba(165,147,123,0.25)", boxShadow: "0 4px 0 #bfb9b4, 0 8px 28px rgba(165,147,123,0.10)" }}>
-                {/* Cover */}
                 <div className="h-40 md:h-48 w-full relative overflow-hidden" style={{ background: "linear-gradient(135deg, #666161 0%, #575353 40%, #4d4949 100%)" }}>
                     <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 40%, rgba(58,55,55,0.55) 100%)" }} />
                     <div className="absolute inset-0 opacity-5 pointer-events-none select-none">
@@ -176,9 +166,7 @@ export default function MyProfilePage({ onAuthError }) {
                     <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: "2px", background: "linear-gradient(to right, #666161, #A5937B, #AF9AC9)" }} />
                 </div>
 
-                {/* Profile info bar */}
                 <div className="px-6 md:px-8 pb-6 md:pb-8 flex flex-col md:flex-row items-start md:items-end -mt-16 relative z-10 gap-4 md:gap-6">
-                    {/* Avatar */}
                     <div className="relative">
                         <div className="w-28 h-28 md:w-36 md:h-36 rounded-xl overflow-hidden" style={{ border: "4px solid #E9E3DE", boxShadow: "0 4px 0 #bfb9b4, 0 6px 16px rgba(58,55,55,0.18)", background: "linear-gradient(135deg, #666161 0%, #4d4949 100%)" }}>
                             {displayData.profilePictureUrl ? (
@@ -196,7 +184,6 @@ export default function MyProfilePage({ onAuthError }) {
                                 </div>
                             )}
                         </div>
-                        {/* Verification badge */}
                         {profile?.verificationStatus && (
                             <div className="absolute -bottom-1.5 -right-1.5 p-1 rounded-full" style={{ border: "4px solid #E9E3DE", background: profile.verificationStatus === "VERIFIED_USER" ? "#AF9AC9" : "#A5937B" }}>
                                 <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="#ffffff">
@@ -206,7 +193,6 @@ export default function MyProfilePage({ onAuthError }) {
                         )}
                     </div>
 
-                    {/* Name & location */}
                     <div className="flex-grow">
                         <h1 className="font-headline text-2xl md:text-3xl font-extrabold tracking-tight" style={{ color: "#3a3737", fontFamily: "'DM Serif Display', serif" }}>
                             {editing ? "Edit Profile" : (displayData.fullName || "Your Profile")}
@@ -232,7 +218,6 @@ export default function MyProfilePage({ onAuthError }) {
                         </div>
                     </div>
 
-                    {/* Action buttons */}
                     <div className="flex items-center gap-3 mt-2 md:mt-0 md:mb-1">
                         {editing ? (
                             <>
@@ -277,7 +262,6 @@ export default function MyProfilePage({ onAuthError }) {
                 </div>
             </section>
 
-            {/* Error / Success banners */}
             {error && (
                 <div className="p-4 rounded-xl text-sm font-medium" style={{ background: "rgba(186,26,26,0.08)", border: "1px solid rgba(186,26,26,0.25)", color: "#ba1a1a" }}>
                     {error}
@@ -290,13 +274,10 @@ export default function MyProfilePage({ onAuthError }) {
                 </div>
             )}
 
-            {/* ═══ BENTO GRID ═══ */}
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
 
-                {/* ── LEFT: Personal Info ── */}
                 <aside className="lg:col-span-4">
                     <div className="rounded-xl p-6 md:p-8 relative overflow-hidden" style={{ background: "#ffffff", border: "1px solid rgba(165,147,123,0.25)", boxShadow: "0 4px 0 #bfb9b4, 0 8px 28px rgba(165,147,123,0.10)" }}>
-                        {/* Decorative barcode */}
                         <div className="absolute top-8 right-8 flex gap-0.5 opacity-20">
                             {[0.5, 1, 0.5, 2, 0.5, 1.5].map((w, i) => (
                                 <div key={i} style={{ background: "#666161", height: "32px", width: `${w * 4}px` }} />
@@ -311,7 +292,6 @@ export default function MyProfilePage({ onAuthError }) {
                         </h2>
 
                         <div className="space-y-5">
-                            {/* Full Name */}
                             <FieldBlock label="Full Name" editing={editing}>
                                 {editing ? (
                                     <input
@@ -328,7 +308,6 @@ export default function MyProfilePage({ onAuthError }) {
                                 )}
                             </FieldBlock>
 
-                            {/* Profile Picture URL (edit only) */}
                             {editing && (
                                 <FieldBlock label="Profile Picture URL" editing>
                                     <input
@@ -343,7 +322,6 @@ export default function MyProfilePage({ onAuthError }) {
                                 </FieldBlock>
                             )}
 
-                            {/* Birth Date + Gender */}
                             <div className="grid grid-cols-2 gap-4">
                                 <FieldBlock label="Birth Date" editing={editing}>
                                     {editing ? (
@@ -378,7 +356,6 @@ export default function MyProfilePage({ onAuthError }) {
                                 </FieldBlock>
                             </div>
 
-                            {/* Current Location (edit only as separate field) */}
                             {editing && (
                                 <FieldBlock label="Current Location" editing>
                                     <input
@@ -393,7 +370,6 @@ export default function MyProfilePage({ onAuthError }) {
                                 </FieldBlock>
                             )}
 
-                            {/* Route History (with perforation line) */}
                             <div className="pt-4 border-t border-dashed border-outline-variant relative">
                                 <div className="absolute -left-10 top-1/2 -translate-y-1/2 w-4 h-4 rounded-full" style={{ background: "#E9E3DE" }} />
                                 <div className="absolute -right-10 top-1/2 -translate-y-1/2 w-4 h-4 rounded-full" style={{ background: "#E9E3DE" }} />
@@ -419,7 +395,6 @@ export default function MyProfilePage({ onAuthError }) {
                                 </div>
                             </div>
 
-                            {/* Bio */}
                             <div className="pt-2">
                                 <FieldBlock label="Bio" editing={editing}>
                                     {editing ? (
@@ -444,10 +419,8 @@ export default function MyProfilePage({ onAuthError }) {
                     </div>
                 </aside>
 
-                {/* ── RIGHT: Travel DNA + Interests ── */}
                 <div className="lg:col-span-8 space-y-8">
 
-                    {/* Travel DNA */}
                     <section className="rounded-xl p-6 md:p-8" style={{ background: "#ffffff", border: "1px solid rgba(165,147,123,0.25)", boxShadow: "0 4px 0 #bfb9b4, 0 8px 28px rgba(165,147,123,0.10)" }}>
                         <h2 className="font-headline text-lg font-bold mb-8 flex items-center gap-2" style={{ color: "#3a3737", fontFamily: "'DM Serif Display', serif" }}>
                             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" style={{ color: "#A5937B" }}>
@@ -480,7 +453,6 @@ export default function MyProfilePage({ onAuthError }) {
                         </div>
                     </section>
 
-                    {/* Interests & Preferences */}
                     <section className="rounded-xl p-6 md:p-8" style={{ background: "#ffffff", border: "1px solid rgba(165,147,123,0.25)", boxShadow: "0 4px 0 #bfb9b4, 0 8px 28px rgba(165,147,123,0.10)" }}>
                         <h2 className="font-headline text-lg font-bold mb-8 flex items-center gap-2" style={{ color: "#3a3737", fontFamily: "'DM Serif Display', serif" }}>
                             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" style={{ color: "#A5937B" }}>
@@ -507,7 +479,6 @@ export default function MyProfilePage({ onAuthError }) {
     );
 }
 
-/* ── Helper components ── */
 function FieldBlock({ label, editing, children }) {
     return (
         <div>

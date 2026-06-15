@@ -20,7 +20,6 @@ const C = {
 const SERIF = "'DM Serif Display', serif";
 const SANS  = "'DM Sans', sans-serif";
 
-// ─── Raised button ────────────────────────────────────────────────────────────
 function RaisedButton({ onClick, disabled, loading, children }) {
     const down = (e) => { if (!disabled) { e.currentTarget.style.transform = "translateY(4px)"; e.currentTarget.style.boxShadow = `0 1px 0 ${C.dark}`; } };
     const up   = (e) => { if (!disabled) { e.currentTarget.style.transform = "translateY(0)";   e.currentTarget.style.boxShadow = `0 5px 0 ${C.dark}, 0 8px 20px rgba(58,55,55,0.22)`; } };
@@ -53,7 +52,6 @@ function RaisedButton({ onClick, disabled, loading, children }) {
     );
 }
 
-// ─── Stub ─────────────────────────────────────────────────────────────────────
 function LoginStub() {
     return (
         <>
@@ -90,7 +88,6 @@ function LoginStub() {
     );
 }
 
-// ─── LoginPage ────────────────────────────────────────────────────────────────
 export default function LoginPage({ onNavigate }) {
     const [email,    setEmail]    = useState("");
     const [password, setPassword] = useState("");
@@ -130,7 +127,6 @@ export default function LoginPage({ onNavigate }) {
             footerLink="Sign Up"
             onFooterClick={() => onNavigate("signup")}
         >
-            {/* Header */}
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "24px" }}>
                 <div>
                     <span style={{ fontFamily: SANS, fontWeight: 700, fontSize: "10px", textTransform: "uppercase", letterSpacing: "0.18em", color: C.tan }}>
@@ -149,14 +145,12 @@ export default function LoginPage({ onNavigate }) {
                 </div>
             </div>
 
-            {/* API error */}
             {apiError && (
                 <div style={{ background: C.errorBg, border: `1px solid ${C.error}22`, borderRadius: "12px", padding: "12px 16px", marginBottom: "16px", fontFamily: SANS, fontSize: "13px", color: C.error }}>
                     {apiError}
                 </div>
             )}
 
-            {/* Meta row */}
             <div style={{ display: "flex", gap: "24px", marginBottom: "20px" }}>
                 {[["Gate", "01"], ["Seat", "1A"], ["Boarding", "Now"]].map(([lbl, val]) => (
                     <div key={lbl}>
@@ -166,7 +160,6 @@ export default function LoginPage({ onNavigate }) {
                 ))}
             </div>
 
-            {/* Fields */}
             <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "14px" }}>
                     <FormInput

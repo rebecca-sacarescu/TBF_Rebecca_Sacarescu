@@ -12,7 +12,6 @@ const C = {
 };
 const SANS = "'DM Sans', sans-serif";
 
-// Variant → pill style mapping — same variant keys as before
 const VARIANT_STYLES = {
     default: {
         background: "rgba(165,147,123,0.14)",
@@ -41,10 +40,6 @@ const VARIANT_STYLES = {
     },
 };
 
-/**
- * TagList — redesigned to match new palette.
- * Props interface unchanged.
- */
 export default function TagList({
                                     label, items = [], editing = false, onChange, variant = "default",
                                 }) {

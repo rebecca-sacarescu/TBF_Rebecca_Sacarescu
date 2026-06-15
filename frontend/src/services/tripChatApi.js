@@ -11,7 +11,7 @@ async function parseBackendError(response) {
         const values = Object.values(data);
         if (values.length > 0) return values.join(", ");
     } catch {
-        // non-JSON body
+
     }
     return "Something went wrong. Please try again.";
 }
@@ -23,23 +23,6 @@ function authHeaders() {
     };
 }
 
-/**
- * GET /trips/{tripId}/chat/messages?page=0&size=30
- *
- * @param {number} tripId
- * @param {number} [page=0]
- * @param {number} [size=30]
- * @returns {Promise<Array<{
- *   id: number,
- *   tripId: number,
- *   senderUserId: number,
- *   senderName: string,
- *   senderProfilePictureUrl: string|null,
- *   content: string,
- *   messageType: "USER_MESSAGE"|"SYSTEM_MESSAGE",
- *   createdAt: string
- * }>>}
- */
 export async function getTripChatMessages(tripId, page = 0, size = 30) {
     const url = `${BASE_URL}/trips/${tripId}/chat/messages?page=${page}&size=${size}`;
     const response = await fetch(url, {

@@ -1,7 +1,5 @@
 import { useState, useCallback } from "react";
 
-// ─── Validation rules (mirror your Spring Boot DTO constraints) ───────────────
-
 const USERNAME_REGEX = /^[a-zA-Z0-9._-]+$/;
 const PASSWORD_RULES = [
     { id: "length",    label: "At least 8 characters",          test: v => v.length >= 8 },
@@ -29,8 +27,6 @@ function validatePassword(value, isSignup) {
     if (isSignup && PASSWORD_RULES.some(r => !r.test(value))) return "Password does not meet all requirements.";
     return null;
 }
-
-// ─── Sub-components ───────────────────────────────────────────────────────────
 
 const Barcode = () => {
     const bars = [3,1,4,1,5,2,3,1,2,4,1,3,2,1,4,2,3,1,2,3,1,4,2,1,3,2,4,1,3,2,1,3,4,2,1,3,2,1,4,3,1,2];
@@ -72,7 +68,6 @@ const InputField = ({ label, type, value, onChange, onBlur, placeholder, error, 
     );
 };
 
-/** Live password requirements checklist — only shown on signup while the field has content */
 const PasswordChecklist = ({ value, visible }) => {
     if (!visible) return null;
     return (
@@ -97,7 +92,6 @@ const PasswordChecklist = ({ value, visible }) => {
     );
 };
 
-/** Red banner for errors returned by the Spring Boot backend */
 const ServerErrorBanner = ({ errors }) => {
     if (!errors || errors.length === 0) return null;
     return (
@@ -117,7 +111,6 @@ const ServerErrorBanner = ({ errors }) => {
     );
 };
 
-// ─── Main component ───────────────────────────────────────────────────────────
 
 export default function TravelBuddy() {
     const [mode, setMode]         = useState("login");
@@ -125,18 +118,14 @@ export default function TravelBuddy() {
     const [email, setEmail]       = useState("");
     const [password, setPassword] = useState("");
 
-    // Track which fields the user has left so we only show errors after they've been touched
     const [touched, setTouched] = useState({});
 
-    // Errors surfaced by the Spring Boot backend (400 / 401 / 409…)
     const [serverErrors, setServerErrors] = useState([]);
 
-    // Loading state while awaiting the API response
     const [loading, setLoading] = useState(false);
 
     const isLogin = mode === "login";
 
-    // ── Derived client-side errors ──────────────────────────────────────────────
     const clientErrors = {
         username: !isLogin ? validateUsername(username) : null,
         email:    validateEmail(email),
@@ -145,7 +134,6 @@ export default function TravelBuddy() {
 
     const isClientValid = Object.values(clientErrors).every(e => e === null);
 
-    // ── Helpers ─────────────────────────────────────────────────────────────────
     const touch    = field => setTouched(prev => ({ ...prev, [field]: true }));
     const touchAll = ()    => setTouched({ username: true, email: true, password: true });
 
@@ -159,7 +147,6 @@ export default function TravelBuddy() {
         resetForm();
     };
 
-    // ── Submit handler ───────────────────────────────────────────────────────────
     const handleSubmit = useCallback(async () => {
         touchAll();
         if (!isClientValid) return;
@@ -168,7 +155,6 @@ export default function TravelBuddy() {
         setServerErrors([]);
 
         try {
-            // 1. Modificăm URL-urile pentru a bate exact spre Spring Boot-ul tău local
             const baseUrl = "http://localhost:8080";
             const endpoint = isLogin ? `${baseUrl}/auth/login` : `${baseUrl}/auth/signup`;
 
@@ -183,27 +169,18 @@ export default function TravelBuddy() {
             });
 
             if (res.ok) {
-                // 2. Extragem JSON-ul (AuthResponseDto)
                 const data = await res.json();
                 console.log("Success:", data);
 
-                // 3. Salvăm token-ul primit în LocalStorage
                 if (data.token) {
                     localStorage.setItem("jwt_token", data.token);
                 }
 
-                // 4. Opțional: Afișăm un mesaj și pregătim redirecționarea
-                alert(isLogin ? "Autentificare reușită!" : "Cont creat cu succes!");
-
-                // Când vei avea pagina de profil gata, vei decomenta linia de mai jos:
-                // window.location.href = "/profile";
+                alert(isLogin ? "Login succes!" : "Account created");
 
                 return;
             }
 
-            // ───────────────────────────────────────────────────────────────────────
-            // Logica de erori rămâne exact la fel, prinde erorile aruncate de Spring
-            // ───────────────────────────────────────────────────────────────────────
             if (res.status === 400) {
                 const data = await res.json().catch(() => null);
                 if (data?.errors && Array.isArray(data.errors)) {
@@ -229,7 +206,6 @@ export default function TravelBuddy() {
         }
     }, [isLogin, isClientValid, username, email, password]);
 
-    // ── Render ───────────────────────────────────────────────────────────────────
     return (
         <>
             <style>{`
@@ -290,7 +266,6 @@ export default function TravelBuddy() {
                 <div className="boarding-card card-shadow bg-white rounded-3xl flex w-full overflow-visible"
                      style={{ maxWidth: "860px", minHeight: "480px", position: "relative" }}>
 
-                    {/* ── LEFT: Brand Panel ── */}
                     <div className="left-panel flex flex-col justify-between px-10 py-10"
                          style={{ flex: "0 0 42%", background: "linear-gradient(160deg, #f0f6ff 0%, #e4eef8 100%)", borderRadius: "1.5rem 0 0 1.5rem", position: "relative", overflow: "visible" }}>
                         <div>
@@ -315,19 +290,16 @@ export default function TravelBuddy() {
                         </div>
                     </div>
 
-                    {/* ── PERFORATED DIVIDER (desktop) ── */}
                     <div className="perf-line hidden md:block"
                          style={{ width: "1px", flexShrink: 0, alignSelf: "stretch", position: "relative" }}>
                         <div className="perf-circle-top" /><div className="perf-circle-bottom" />
                     </div>
 
-                    {/* ── PERFORATED DIVIDER (mobile) ── */}
                     <div className="perf-line-mobile md:hidden"
                          style={{ height: "1px", flexShrink: 0, position: "relative", margin: "0 32px" }}>
                         <div className="perf-circle-left" /><div className="perf-circle-right" />
                     </div>
 
-                    {/* ── RIGHT: Action Panel ── */}
                     <div className="flex flex-col justify-center px-10 py-10"
                          style={{ flex: 1, borderRadius: "0 1.5rem 1.5rem 0" }}>
 
@@ -342,10 +314,8 @@ export default function TravelBuddy() {
                             </h2>
                         </div>
 
-                        {/* Server-side error banner */}
                         <ServerErrorBanner errors={serverErrors} />
 
-                        {/* Form fields */}
                         <div>
                             {!isLogin && (
                                 <div className="field-enter" key="username-field">
@@ -384,11 +354,9 @@ export default function TravelBuddy() {
                                 touched={touched.password}
                             />
 
-                            {/* Live password checklist — signup only, appears as soon as the user starts typing */}
                             <PasswordChecklist value={password} visible={!isLogin && password.length > 0} />
                         </div>
 
-                        {/* Submit button */}
                         <button
                             className="btn-primary w-full mt-2 py-3.5 rounded-xl text-white font-semibold text-sm uppercase"
                             style={{ fontFamily: "'DM Mono', monospace" }}
@@ -398,7 +366,6 @@ export default function TravelBuddy() {
                             {loading ? "Please wait…" : isLogin ? "Check-In" : "Book Flight"}
                         </button>
 
-                        {/* Toggle link */}
                         <p className="text-center mt-5 text-sm" style={{ color: "#7c8fa6" }}>
                             {isLogin ? (
                                 <>New traveler?{" "}<span className="toggle-link" onClick={handleToggle}>Grab a ticket here.</span></>

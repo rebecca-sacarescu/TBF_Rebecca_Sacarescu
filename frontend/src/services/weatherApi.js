@@ -2,7 +2,6 @@
 const GEO_URL    = "https://geocoding-api.open-meteo.com/v1/search";
 const WEATHER_URL = "https://api.open-meteo.com/v1/forecast";
 
-// WMO weather code → label + icon type
 const WMO_MAP = {
     0:  { label: "Clear sky",        icon: "sun" },
     1:  { label: "Mainly clear",     icon: "sun" },
@@ -33,10 +32,7 @@ export function getWeatherMeta(code) {
     return WMO_MAP[code] ?? { label: "Unknown", icon: "sun" };
 }
 
-/**
- * Geocode a city+country string to lat/lon using Open-Meteo geocoding.
- * Returns { latitude, longitude, name, country } or null.
- */
+
 export async function geocodeCity(city, country = "") {
     const query = [city, country].filter(Boolean).join(", ");
     const url = `${GEO_URL}?name=${encodeURIComponent(query)}&count=1&language=en&format=json`;
@@ -48,10 +44,6 @@ export async function geocodeCity(city, country = "") {
     return { latitude: r.latitude, longitude: r.longitude, name: r.name, country: r.country };
 }
 
-/**
- * Fetch 7-day weather forecast for given coordinates.
- * Returns array of { date, maxTemp, minTemp, weatherCode, label, icon }
- */
 export async function getWeeklyForecast(latitude, longitude) {
     const params = new URLSearchParams({
         latitude,
@@ -82,10 +74,6 @@ export async function getWeeklyForecast(latitude, longitude) {
     });
 }
 
-/**
- * Get just today's weather preview for a city.
- * Returns { temp, minTemp, maxTemp, label, icon } or null.
- */
 export async function getWeatherPreview(city, country = "") {
     try {
         const geo = await geocodeCity(city, country);

@@ -1,6 +1,6 @@
 const BASE = "https://api.opentripmap.com/0.1/en/places";
 const API_KEY = import.meta.env.VITE_OPENTRIPMAP_API_KEY ?? "";
-// Map TripType enum → OpenTripMap kinds
+
 const TRIP_TYPE_KINDS = {
     CITY_BREAK:    "interesting_places,historic,architecture,cultural",
     ROAD_TRIP:     "natural,scenic_view,interesting_places",
@@ -12,14 +12,6 @@ const TRIP_TYPE_KINDS = {
 
 const DEFAULT_KINDS = "interesting_places,historic,cultural,natural";
 
-/**
- * Fetch places near coordinates for a given trip type.
- * @param {number} lat
- * @param {number} lon
- * @param {string} tripType — TripType enum value
- * @param {number} limit
- * @returns {Promise<PlaceCard[]>}
- */
 export async function getPlacesNearby(lat, lon, tripType = "", limit = 12) {
     const kinds = TRIP_TYPE_KINDS[tripType] || DEFAULT_KINDS;
     const radius = 10000; // 10km radius
@@ -52,10 +44,6 @@ export async function getPlacesNearby(lat, lon, tripType = "", limit = 12) {
         }));
 }
 
-/**
- * Fetch detailed info for a single place by xid.
- * Returns { name, description, imageUrl, wikipediaUrl, address }
- */
 export async function getPlaceDetail(xid) {
     const url = API_KEY
         ? `${BASE}/xid/${xid}?apikey=${API_KEY}`
@@ -78,9 +66,6 @@ export async function getPlaceDetail(xid) {
     };
 }
 
-/**
- * Format a kinds string into readable category tags.
- */
 export function formatKinds(kinds = "") {
     const skip = new Set(["interesting_places", "other", "accomodations"]);
     return kinds

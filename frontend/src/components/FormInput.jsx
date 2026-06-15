@@ -12,10 +12,6 @@ const C = {
 };
 const SANS = "'DM Sans', sans-serif";
 
-/**
- * FormInput — redesigned to match new palette.
- * Props interface unchanged.
- */
 export default function FormInput({
                                       label, icon: Icon, type = "text",
                                       placeholder, value, onChange, error, hint, id,

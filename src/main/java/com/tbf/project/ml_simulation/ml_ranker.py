@@ -2,7 +2,9 @@ import os
 import warnings
 import joblib
 import redis
+import psycopg2
 import pandas as pd
+from collections import defaultdict
 from config import OUTPUT_DIR
 from db import list_actor_ids, get_profile
 from scoring import compute_pair_features
@@ -16,6 +18,12 @@ FEED_TTL_SECONDS = 86400
 REDIS_HOST = "localhost"
 REDIS_PORT = 6379
 REDIS_DB = 0
+
+DB_HOST = "localhost"
+DB_PORT = 5432
+DB_NAME = "TBF"
+DB_USER = "postgres"
+DB_PASSWORD = "rebecca"
 
 FEATURES = [
     "budget_diff",
@@ -46,7 +54,45 @@ def get_redis_client():
     return redis.Redis(host=REDIS_HOST, port=REDIS_PORT, db=REDIS_DB, decode_responses=True)
 
 
-def build_feature_vector(pair_features):
+def load_behavioral_features():
+    conn = psycopg2.connect(
+        host=DB_HOST, port=DB_PORT,
+        dbname=DB_NAME, user=DB_USER, password=DB_PASSWORD
+    )
+    cur = conn.cursor()
+
+    cur.execute("""
+        SELECT actor_user_id, target_user_id, event_type, dwell_time_ms
+        FROM profile_interaction_events
+    """)
+    rows = cur.fetchall()
+    cur.close()
+    conn.close()
+
+    behavioral = defaultdict(lambda: {
+        "card_click": 0,
+        "full_profile_open": 0,
+        "dwell_time_ms": 0,
+        "saved_profile": 0,
+    })
+
+    for actor_id, target_id, event_type, dwell_time_ms in rows:
+        key = (actor_id, target_id)
+        if event_type == "CARD_CLICK":
+            behavioral[key]["card_click"] = 1
+        elif event_type == "FULL_PROFILE_OPEN":
+            behavioral[key]["full_profile_open"] = 1
+        elif event_type == "DWELL_RECORDED" and dwell_time_ms:
+            behavioral[key]["dwell_time_ms"] = max(behavioral[key]["dwell_time_ms"], dwell_time_ms)
+        elif event_type == "SAVE":
+            behavioral[key]["saved_profile"] = 1
+        elif event_type == "UNSAVE":
+            behavioral[key]["saved_profile"] = 0
+
+    return behavioral
+
+
+def build_feature_vector(pair_features, behavioral):
     row = {
         "budget_diff": pair_features["budget_diff"],
         "planning_diff": pair_features["planning_diff"],
@@ -65,15 +111,15 @@ def build_feature_vector(pair_features):
         "experience_score": pair_features["experience_score"],
         "intent_score": pair_features["intent_score"],
         "static_score": pair_features["static_score"],
-        "card_click": 0,
-        "full_profile_open": 0,
-        "dwell_time_ms": 0,
-        "saved_profile": 0,
+        "card_click": behavioral["card_click"],
+        "full_profile_open": behavioral["full_profile_open"],
+        "dwell_time_ms": behavioral["dwell_time_ms"],
+        "saved_profile": behavioral["saved_profile"],
     }
     return pd.DataFrame([row], columns=FEATURES)
 
 
-def rank_feed_for_user(actor_id, model, redis_client, all_profiles):
+def rank_feed_for_user(actor_id, model, redis_client, all_profiles, all_behavioral):
     actor_profile = all_profiles.get(actor_id)
     if actor_profile is None:
         return
@@ -91,7 +137,8 @@ def rank_feed_for_user(actor_id, model, redis_client, all_profiles):
     for candidate in candidates:
         try:
             pair_features = compute_pair_features(actor_profile, candidate)
-            feature_vector = build_feature_vector(pair_features)
+            behavioral = all_behavioral[(actor_id, candidate["user_id"])]
+            feature_vector = build_feature_vector(pair_features, behavioral)
             ml_score = float(model.predict(feature_vector)[0])
             ml_score = max(0.0, min(100.0, ml_score))
             scored.append((candidate["user_id"], ml_score))
@@ -117,8 +164,11 @@ def main():
     model = joblib.load(MODEL_FILE)
     redis_client = get_redis_client()
 
-    actor_ids = list_actor_ids()
+    print("Loading behavioral features from database...")
+    all_behavioral = load_behavioral_features()
+    print(f"Loaded behavioral data for {len(all_behavioral)} pairs.")
 
+    actor_ids = list_actor_ids()
     print(f"Loading profiles for {len(actor_ids)} users...")
 
     all_profiles = {}
@@ -133,7 +183,7 @@ def main():
 
     for index, actor_id in enumerate(all_profiles.keys(), start=1):
         print(f"[{index}/{total}] Ranking feed for user {actor_id}")
-        rank_feed_for_user(actor_id, model, redis_client, all_profiles)
+        rank_feed_for_user(actor_id, model, redis_client, all_profiles, all_behavioral)
 
     print("Feed ranking complete. All feeds written to Redis.")
 

@@ -1,6 +1,3 @@
-// ChipSelector.jsx — redesigned to match new palette
-// Zero functional changes — same props interface as before.
-
 const C = {
     beigeLight: "#E9E3DE",
     beigeMid:   "#faf8f6",
@@ -24,7 +21,6 @@ export default function ChipSelector({ label, options = [], selected = [], onCha
 
     return (
         <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-            {/* Label */}
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                 <p style={{
                     fontFamily: SANS, fontWeight: 700, fontSize: "10px",
@@ -43,7 +39,6 @@ export default function ChipSelector({ label, options = [], selected = [], onCha
                 )}
             </div>
 
-            {/* Chips */}
             <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
                 {options.map((opt) => {
                     const isSelected = selected.includes(opt);

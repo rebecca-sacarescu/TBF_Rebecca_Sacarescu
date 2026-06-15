@@ -1,4 +1,3 @@
-// ─── Existing icons ───────────────────────────────────────────────────────────
 
 export function FlightIcon({ size = 24 }) {
     return (
@@ -76,12 +75,7 @@ export function CheckCircleIcon({ size = 32 }) {
     );
 }
 
-// ─── New icons ────────────────────────────────────────────────────────────────
 
-/**
- * BookmarkIcon — outline when not saved, filled when saved.
- * @param {{ size?: number, filled?: boolean }} props
- */
 export function BookmarkIcon({ size = 20, filled = false }) {
     return filled ? (
         <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
@@ -94,9 +88,6 @@ export function BookmarkIcon({ size = 20, filled = false }) {
     );
 }
 
-/**
- * ChevronLeftIcon — back arrow.
- */
 export function ChevronLeftIcon({ size = 20 }) {
     return (
         <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -105,9 +96,7 @@ export function ChevronLeftIcon({ size = 20 }) {
     );
 }
 
-/**
- * EyeIcon — view full profile affordance.
- */
+
 export function EyeIcon({ size = 18 }) {
     return (
         <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -117,9 +106,6 @@ export function EyeIcon({ size = 18 }) {
     );
 }
 
-/**
- * VerifiedIcon — shown on verified profiles.
- */
 export function VerifiedIcon({ size = 16 }) {
     return (
         <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="currentColor">

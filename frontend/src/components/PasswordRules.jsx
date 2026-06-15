@@ -7,7 +7,6 @@ const C = {
 };
 const SANS = "'DM Sans', sans-serif";
 
-// Props interface unchanged
 export default function PasswordRules({ password }) {
     if (!password) return null;
     return (

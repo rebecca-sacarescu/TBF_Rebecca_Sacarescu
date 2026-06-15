@@ -5,14 +5,12 @@ import profileApi from "../services/profileApi";
 const SERIF = "'DM Serif Display', serif";
 const SANS  = "'DM Sans', sans-serif";
 
-// ─── resolveActive — unchanged logic ─────────────────────────────────────────
 function resolveActive(page) {
     if (page === "discover")  return "feed";
     if (page === "trip-room") return "my-trips";
     return page;
 }
 
-// ─── Avatar (small, for My Profile button) ────────────────────────────────────
 function NavAvatar({ name = "", url }) {
     const inits = name.trim().split(/\s+/).filter(Boolean)
         .slice(0, 2).map((w) => w[0]?.toUpperCase() ?? "").join("") || "TB";
@@ -37,7 +35,6 @@ function NavAvatar({ name = "", url }) {
     );
 }
 
-// ─── Dropdown menu ────────────────────────────────────────────────────────────
 function Dropdown({ items, onNavigate, active }) {
     return (
         <div style={{
@@ -98,15 +95,12 @@ function Dropdown({ items, onNavigate, active }) {
     );
 }
 
-// ─── NavItem — text link with optional dropdown ───────────────────────────────
 function NavItem({ label, items, navKey, active, onNavigate }) {
     const [open, setOpen] = useState(false);
     const ref = useRef(null);
     const timeoutRef = useRef(null);
 
     const hasDropdown = items && items.length > 0;
-    // this item is "active" if it has no dropdown and its key matches,
-    // OR if it has a dropdown and one of its children is active
     const isActive = hasDropdown
         ? items.some((i) => i.key === active)
         : active === navKey;
@@ -143,7 +137,6 @@ function NavItem({ label, items, navKey, active, onNavigate }) {
                 onMouseLeave={(e) => { e.currentTarget.style.color = isActive ? "#ffffff" : "rgba(255,255,255,0.72)"; }}
             >
                 {label}
-                {/* active underline */}
                 {isActive && (
                     <span style={{
                         position: "absolute", bottom: "2px", left: "10px", right: "10px",
@@ -151,7 +144,6 @@ function NavItem({ label, items, navKey, active, onNavigate }) {
                         background: "linear-gradient(to right, #A5937B, #AF9AC9)",
                     }} />
                 )}
-                {/* chevron for dropdowns */}
                 {hasDropdown && (
                     <svg
                         xmlns="http://www.w3.org/2000/svg" width="10" height="10"
@@ -171,7 +163,6 @@ function NavItem({ label, items, navKey, active, onNavigate }) {
     );
 }
 
-// ─── TopNav ───────────────────────────────────────────────────────────────────
 export default function TopNav({ activeTab, onNavigate }) {
     const [profile, setProfile] = useState(null);
     const [profileOpen, setProfileOpen] = useState(false);
@@ -183,7 +174,6 @@ export default function TopNav({ activeTab, onNavigate }) {
         profileApi.getMyProfile().then((data) => setProfile(data)).catch(() => {});
     }, []);
 
-    // close profile dropdown on outside click
     useEffect(() => {
         if (!profileOpen) return;
         const handler = (e) => {
@@ -204,7 +194,6 @@ export default function TopNav({ activeTab, onNavigate }) {
         onNavigate("login");
     }, [onNavigate]);
 
-    // ── Nav structure ────────────────────────────────────────────────────────
     const NAV_ITEMS = [
         {
             label: "Discovery",
@@ -278,7 +267,6 @@ export default function TopNav({ activeTab, onNavigate }) {
                     gap: "0",
                 }}>
 
-                    {/* ── Brand ───────────────────────────────────────────── */}
                     <button
                         onClick={() => handleNavigate("feed")}
                         style={{
@@ -296,7 +284,6 @@ export default function TopNav({ activeTab, onNavigate }) {
                         </span>
                     </button>
 
-                    {/* ── Center nav links ─────────────────────────────────── */}
                     <div style={{ display: "flex", alignItems: "center", gap: "4px", flex: 1 }}>
                         {NAV_ITEMS.map((item) => (
                             <NavItem
@@ -310,7 +297,6 @@ export default function TopNav({ activeTab, onNavigate }) {
                         ))}
                     </div>
 
-                    {/* ── My Profile ───────────────────────────────────────── */}
                     <div ref={profileRef} style={{ position: "relative", flexShrink: 0 }}>
                         <button
                             onClick={() => setProfileOpen((v) => !v)}
@@ -343,7 +329,6 @@ export default function TopNav({ activeTab, onNavigate }) {
                             </svg>
                         </button>
 
-                        {/* Profile dropdown */}
                         {profileOpen && (
                             <div style={{
                                 position: "absolute", top: "calc(100% + 10px)", right: 0,

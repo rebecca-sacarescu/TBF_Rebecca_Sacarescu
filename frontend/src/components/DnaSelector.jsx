@@ -1,12 +1,4 @@
-/**
- * DnaSelector — renders a 3-option toggle group.
- * @param {Object} props
- * @param {string} props.label - Section title (e.g., "Social Battery")
- * @param {Array<{value: string, label: string, icon?: string}>} props.options
- * @param {string} props.selected - Current value
- * @param {boolean} props.editing - If true, buttons are clickable
- * @param {function} props.onChange - Called with new value
- */
+
 export default function DnaSelector({ label, options, selected, editing, onChange }) {
     return (
         <div className="space-y-3">
@@ -22,7 +14,6 @@ export default function DnaSelector({ label, options, selected, editing, onChang
             </div>
 
             {editing ? (
-                /* Edit mode: card-style buttons with icons */
                 <div className="grid grid-cols-3 gap-3">
                     {options.map((opt) => {
                         const isActive = selected === opt.value;
@@ -44,7 +35,6 @@ export default function DnaSelector({ label, options, selected, editing, onChang
                     })}
                 </div>
             ) : (
-                /* View mode: compact segmented control */
                 <div className="grid grid-cols-3 gap-1 bg-surface-container p-1 rounded-xl">
                     {options.map((opt) => {
                         const isActive = selected === opt.value;

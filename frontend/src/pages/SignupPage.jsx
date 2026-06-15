@@ -21,7 +21,6 @@ const C = {
 const SERIF = "'DM Serif Display', serif";
 const SANS  = "'DM Sans', sans-serif";
 
-// ─── Raised button — sand/warm variant for signup ─────────────────────────────
 function RaisedButton({ onClick, disabled, loading, children }) {
     const shadow     = `0 5px 0 #8a6e3a, 0 8px 20px rgba(165,147,123,0.28)`;
     const shadowDown = `0 1px 0 #8a6e3a`;
@@ -56,7 +55,6 @@ function RaisedButton({ onClick, disabled, loading, children }) {
     );
 }
 
-// ─── Stub ─────────────────────────────────────────────────────────────────────
 function SignupStub() {
     return (
         <>
@@ -109,7 +107,6 @@ function SignupStub() {
     );
 }
 
-// ─── SignupPage ───────────────────────────────────────────────────────────────
 export default function SignupPage({ onNavigate }) {
     const [form, setForm] = useState({ email: "", username: "", password: "", confirmPassword: "" });
     const [errors,   setErrors]   = useState({});
@@ -159,7 +156,6 @@ export default function SignupPage({ onNavigate }) {
             footerLink="Check-In"
             onFooterClick={() => onNavigate("login")}
         >
-            {/* Header */}
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "22px" }}>
                 <div>
                     <span style={{ fontFamily: SANS, fontWeight: 700, fontSize: "10px", textTransform: "uppercase", letterSpacing: "0.18em", color: C.tan }}>
@@ -178,14 +174,12 @@ export default function SignupPage({ onNavigate }) {
                 </div>
             </div>
 
-            {/* API error */}
             {apiError && (
                 <div style={{ background: C.errorBg, border: `1px solid ${C.error}22`, borderRadius: "12px", padding: "12px 16px", marginBottom: "14px", fontFamily: SANS, fontSize: "13px", color: C.error }}>
                     {apiError}
                 </div>
             )}
 
-            {/* Fields */}
             <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "12px" }}>
                     <FormInput id="signup-email"    label="Contact Email"            icon={MailIcon}   type="email"    placeholder="passenger@skyhigh.com"    value={form.email}           onChange={setField("email")}           error={errors.email} />
@@ -200,7 +194,6 @@ export default function SignupPage({ onNavigate }) {
                     <FormInput id="signup-confirm" label="Confirm Access Pin" icon={LockIcon} type="password" placeholder="••••••••••••" value={form.confirmPassword} onChange={setField("confirmPassword")} error={errors.confirmPassword} />
                 </div>
 
-                {/* Bottom bar */}
                 <div style={{
                     display: "flex", alignItems: "center", justifyContent: "space-between",
                     borderTop: `1px solid ${C.tanBorder}`, paddingTop: "16px", marginTop: "4px",

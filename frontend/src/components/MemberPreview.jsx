@@ -1,5 +1,3 @@
-// MemberPreview.jsx — new component
-// Overlapping avatar stack showing trip crew members.
 
 const C = {
     beigeLight: "#E9E3DE",
@@ -56,13 +54,6 @@ function Avatar({ member, size, isOwner, zIndex }) {
     );
 }
 
-/**
- * @param {{
- *   members: {userId, fullName, profilePictureUrl, role}[],
- *   maxVisible?: number,
- *   size?: number,
- * }} props
- */
 export default function MemberPreview({ members = [], maxVisible = 3, size = 28 }) {
     if (members.length === 0) return null;
 

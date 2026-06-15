@@ -17,7 +17,6 @@ const C = {
 const SERIF = "'DM Serif Display', serif";
 const SANS  = "'DM Sans', sans-serif";
 
-// ─── Enum maps ────────────────────────────────────────────────────────────────
 const SOCIAL_BATTERY = {
     INTROVERT:        { label: "Introvert" },
     AMBIVERT:         { label: "Ambivert" },
@@ -52,7 +51,6 @@ function formatSavedAt(isoString) {
     } catch { return isoString; }
 }
 
-// ─── Spinner ──────────────────────────────────────────────────────────────────
 function Spinner() {
     return (
         <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "14px", padding: "80px 0", fontFamily: SANS }}>
@@ -63,7 +61,6 @@ function Spinner() {
     );
 }
 
-// ─── DNA pill ─────────────────────────────────────────────────────────────────
 function DnaPill({ label }) {
     return (
         <span style={{
@@ -78,7 +75,6 @@ function DnaPill({ label }) {
     );
 }
 
-// ─── Remove confirm ───────────────────────────────────────────────────────────
 function RemoveConfirm({ name, onConfirm, onCancel, loading }) {
     return (
         <div style={{ position: "absolute", inset: 0, zIndex: 20, display: "flex", alignItems: "center", justifyContent: "center", borderRadius: "20px", overflow: "hidden" }}>
@@ -106,7 +102,6 @@ function RemoveConfirm({ name, onConfirm, onCancel, loading }) {
     );
 }
 
-// ─── Saved profile card ───────────────────────────────────────────────────────
 function SavedCard({ profile, onRemove, onViewProfile }) {
     const [confirming,    setConfirming]    = useState(false);
     const [removeLoading, setRemoveLoading] = useState(false);
@@ -155,7 +150,7 @@ function SavedCard({ profile, onRemove, onViewProfile }) {
             onMouseEnter={(e) => cardHover(e, true)}
             onMouseLeave={(e) => cardHover(e, false)}
         >
-            {/* Accent strip */}
+
             <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: "3px", background: `linear-gradient(to right, ${C.grayWarm}, ${C.tan}, ${C.lavender})` }} />
 
             {confirming && (
@@ -167,7 +162,6 @@ function SavedCard({ profile, onRemove, onViewProfile }) {
                 />
             )}
 
-            {/* Photo */}
             <div style={{ position: "relative", flexShrink: 0, width: "140px", minHeight: "180px", overflow: "hidden", background: `linear-gradient(135deg, ${C.grayWarm} 0%, #4d4949 100%)` }}>
                 {hasImg && (
                     <img src={profilePictureUrl} alt={fullName}
@@ -192,7 +186,6 @@ function SavedCard({ profile, onRemove, onViewProfile }) {
                 )}
             </div>
 
-            {/* Content */}
             <div style={{ flex: 1, display: "flex", flexDirection: "column", padding: "20px 22px", gap: "10px", minWidth: 0 }}>
                 <div>
                     <div style={{ display: "flex", alignItems: "baseline", gap: "8px", flexWrap: "wrap" }}>
@@ -238,7 +231,6 @@ function SavedCard({ profile, onRemove, onViewProfile }) {
 
                 {removeError && <p style={{ fontFamily: SANS, fontSize: "11px", color: C.error, margin: 0 }}>{removeError}</p>}
 
-                {/* Mobile actions */}
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", borderTop: `1px dashed ${C.tanBorder}`, paddingTop: "10px", marginTop: "auto" }} className="md:hidden">
                     <span style={{ fontFamily: SANS, fontWeight: 600, fontSize: "10px", textTransform: "uppercase", letterSpacing: "0.12em", color: C.tan }}>
                         Saved {formatSavedAt(savedAt)}
@@ -256,19 +248,16 @@ function SavedCard({ profile, onRemove, onViewProfile }) {
                 </div>
             </div>
 
-            {/* Right stub — desktop only */}
             <div className="hidden md:flex" style={{ flexDirection: "column", alignItems: "center", justifyContent: "space-between", flexShrink: 0, width: "80px", padding: "20px 14px", background: C.beigeMid, position: "relative", backgroundImage: `linear-gradient(to bottom, ${C.tan} 50%, transparent 0%)`, backgroundPosition: "left", backgroundSize: "1px 8px", backgroundRepeat: "repeat-y" }}>
                 <div style={{ position: "absolute", left: "-10px", top: "20%", width: "20px", height: "20px", borderRadius: "50%", background: C.beigeLight, border: `1px solid ${C.tanBorder}` }} />
                 <div style={{ position: "absolute", left: "-10px", bottom: "20%", width: "20px", height: "20px", borderRadius: "50%", background: C.beigeLight, border: `1px solid ${C.tanBorder}` }} />
 
-                {/* Barcode */}
                 <div style={{ display: "flex", gap: "2px", opacity: 0.18 }}>
                     {[0.5,1,0.5,2,0.5,1.5,0.5,1].map((w, i) => (
                         <div key={i} style={{ background: C.grayWarm, width: `${w*3}px`, height: "28px", borderRadius: "1px" }} />
                     ))}
                 </div>
 
-                {/* Saved date */}
                 <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "4px", flex: 1, justifyContent: "center" }}>
                     <p style={{ fontFamily: SANS, fontWeight: 700, fontSize: "8px", textTransform: "uppercase", letterSpacing: "0.16em", color: C.tan, margin: 0 }}>Saved</p>
                     <p style={{ fontFamily: SANS, fontWeight: 600, fontSize: "9px", color: C.grayWarm, margin: 0, textAlign: "center", writingMode: "vertical-rl", transform: "rotate(180deg)", maxHeight: "70px" }}>
@@ -276,7 +265,6 @@ function SavedCard({ profile, onRemove, onViewProfile }) {
                     </p>
                 </div>
 
-                {/* View profile */}
                 <button
                     onClick={() => onViewProfile(targetUserId)}
                     style={{ padding: "8px", borderRadius: "10px", background: "none", border: "none", cursor: "pointer", color: C.lavender, transition: "background 0.15s ease" }}
@@ -289,7 +277,6 @@ function SavedCard({ profile, onRemove, onViewProfile }) {
                     </svg>
                 </button>
 
-                {/* Remove button */}
                 <button
                     onClick={() => setConfirming(true)}
                     style={{ padding: "8px", borderRadius: "10px", background: "none", border: "none", cursor: "pointer", color: C.tan, transition: "all 0.15s ease" }}
@@ -304,7 +291,6 @@ function SavedCard({ profile, onRemove, onViewProfile }) {
     );
 }
 
-// ─── Empty state ──────────────────────────────────────────────────────────────
 function EmptyState({ onNavigate }) {
     return (
         <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: "20px", padding: "80px 24px", textAlign: "center", background: C.white, borderRadius: "20px", border: `1.5px dashed ${C.tanBorder}` }}>
@@ -330,7 +316,6 @@ function EmptyState({ onNavigate }) {
     );
 }
 
-// ─── SavedProfilesPage ────────────────────────────────────────────────────────
 export default function SavedProfilesPage({ onNavigate, onViewProfile }) {
     const [profiles, setProfiles] = useState([]);
     const [loading,  setLoading]  = useState(true);
@@ -360,7 +345,6 @@ export default function SavedProfilesPage({ onNavigate, onViewProfile }) {
     return (
         <div style={{ display: "flex", flexDirection: "column", gap: "24px", paddingBottom: "32px", fontFamily: SANS }}>
 
-            {/* Header */}
             <section style={{ background: C.white, borderRadius: "20px", border: `1px solid ${C.tanBorder}`, boxShadow: `0 4px 0 #bfb9b4, 0 8px 28px rgba(165,147,123,0.10)`, overflow: "hidden" }}>
                 <div style={{ height: "100px", background: `linear-gradient(135deg, ${C.grayWarm} 0%, #575353 40%, #4d4949 100%)`, position: "relative", overflow: "hidden" }}>
                     <div style={{ position: "absolute", inset: 0, background: `linear-gradient(to bottom, transparent 40%, rgba(58,55,55,0.55) 100%)` }} />
@@ -384,7 +368,6 @@ export default function SavedProfilesPage({ onNavigate, onViewProfile }) {
                 </div>
             </section>
 
-            {/* Error */}
             {error && (
                 <div style={{ background: C.white, borderRadius: "16px", border: `1.5px dashed rgba(186,26,26,0.30)`, padding: "24px", textAlign: "center" }}>
                     <p style={{ fontFamily: SANS, fontSize: "13px", color: C.tan, margin: "0 0 14px" }}>{error}</p>
@@ -394,10 +377,8 @@ export default function SavedProfilesPage({ onNavigate, onViewProfile }) {
                 </div>
             )}
 
-            {/* Empty */}
             {!error && profiles.length === 0 && <EmptyState onNavigate={onNavigate} />}
 
-            {/* List */}
             {!error && profiles.length > 0 && (
                 <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
                     {profiles.map((profile) => (

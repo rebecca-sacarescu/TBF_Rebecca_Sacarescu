@@ -25,7 +25,6 @@ export default function App() {
     const [discoverFromPage, setDiscoverFromPage] = useState("feed");
     const [tripRoomTripId, setTripRoomTripId] = useState(null);
 
-    // ── NEW: userId extras din profilul curent, folosit in TripChatPanel ──────
     const [currentUserId, setCurrentUserId] = useState(null);
 
     const handleNavigate = useCallback((target) => {
@@ -57,11 +56,9 @@ export default function App() {
             .getMyProfile()
             .then((profile) => {
                 if (cancelled) return;
-                // Salveaza userId din profilul returnat de backend
                 if (profile?.userId != null) {
                     setCurrentUserId(profile.userId);
                 } else if (profile?.id != null) {
-                    // fallback daca campul se numeste "id" in loc de "userId"
                     setCurrentUserId(profile.id);
                 }
                 setPage("feed");

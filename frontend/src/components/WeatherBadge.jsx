@@ -1,14 +1,3 @@
-/**
- * WeatherBadge.jsx
- *
- * Compact weather badge for TripTicketCard stub area.
- * Shows temp + icon for destination.
- * Lazy-loads on mount — does not block card render.
- *
- * Props:
- *   city    {string}
- *   country {string}
- */
 
 import { useState, useEffect } from "react";
 import { getWeatherPreview } from "../services/weatherApi";

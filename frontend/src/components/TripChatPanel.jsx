@@ -1,25 +1,9 @@
-/**
- * TripChatPanel.jsx
- *
- * Real-time group chat panel for a Trip Room.
- * Loads history via REST, then upgrades to live WebSocket (STOMP/SockJS).
- *
- * Props:
- *   tripId            {number}   — required
- *   tripTitle         {string}   — display name of the trip
- *   destinationCity   {string}
- *   destinationCountry{string}
- *   memberCount       {number}
- *   readonly          {boolean}  — true when trip is CLOSED/CANCELLED/EXPIRED or ended
- *   currentUserId     {number|null} — optional; used to align own messages to the right
- */
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import TokenService from "../services/tokenService";
 import { getTripChatMessages } from "../services/tripChatApi";
 import { connectTripChatSocket } from "../services/tripChatSocket";
 
-// ─── Design tokens (matches Travel Buddy palette) ─────────────────────────────
 const C = {
     beigeLight: "#E9E3DE",
     beigeMid:   "#faf8f6",
@@ -36,7 +20,6 @@ const C = {
 const SERIF = "'DM Serif Display', serif";
 const SANS  = "'DM Sans', sans-serif";
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
 
 function getInitials(name = "") {
     return name.trim().split(/\s+/).filter(Boolean).slice(0, 2)
@@ -60,7 +43,6 @@ function formatTime(iso) {
     } catch { return ""; }
 }
 
-/** Stable sort: by createdAt ascending, then by id ascending for ties */
 function sortMessages(msgs) {
     return [...msgs].sort((a, b) => {
         const t = new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
@@ -69,7 +51,6 @@ function sortMessages(msgs) {
     });
 }
 
-/** Deduplicate by message id */
 function dedupeMessages(msgs) {
     const seen = new Set();
     return msgs.filter((m) => {
@@ -78,8 +59,6 @@ function dedupeMessages(msgs) {
         return true;
     });
 }
-
-// ─── Sub-components ───────────────────────────────────────────────────────────
 
 function Spinner({ size = 24, color = C.grayWarm, accent = C.lavender }) {
     return (
@@ -96,7 +75,6 @@ function Spinner({ size = 24, color = C.grayWarm, accent = C.lavender }) {
     );
 }
 
-/** Avatar circle with image or initials fallback */
 function Avatar({ name, url, size = 34, isOwn = false }) {
     const inits = getInitials(name);
     return (
@@ -123,7 +101,6 @@ function Avatar({ name, url, size = 34, isOwn = false }) {
     );
 }
 
-/** System message timeline chip */
 function SystemChip({ content }) {
     return (
         <div style={{ display: "flex", alignItems: "center", gap: "10px", padding: "4px 0" }}>
@@ -142,7 +119,6 @@ function SystemChip({ content }) {
     );
 }
 
-/** Single chat message bubble */
 function MessageBubble({ msg, isOwn, showAvatar, showName }) {
     const isSystem = msg.messageType === "SYSTEM_MESSAGE";
     if (isSystem) return <SystemChip content={msg.content} />;
@@ -211,7 +187,6 @@ function MessageBubble({ msg, isOwn, showAvatar, showName }) {
     );
 }
 
-// ─── TripChatPanel ────────────────────────────────────────────────────────────
 
 const MAX_CHARS = 1000;
 
@@ -238,12 +213,10 @@ export default function TripChatPanel({
     const inputRef     = useRef(null);
     const isMounted    = useRef(true);
 
-    // ── Scroll to bottom ────────────────────────────────────────────────────
     const scrollToBottom = useCallback((behavior = "smooth") => {
         bottomRef.current?.scrollIntoView({ behavior, block: "end" });
     }, []);
 
-    // ── Append incoming message (dedupe) ────────────────────────────────────
     const handleIncoming = useCallback((msg) => {
         if (!isMounted.current) return;
         setMessages((prev) => {
@@ -252,7 +225,6 @@ export default function TripChatPanel({
         });
     }, []);
 
-    // ── Fetch history on mount ───────────────────────────────────────────────
     useEffect(() => {
         isMounted.current = true;
         let cancelled = false;
@@ -276,17 +248,14 @@ export default function TripChatPanel({
         return () => { cancelled = true; };
     }, [tripId]);
 
-    // ── Scroll to bottom when history loads ─────────────────────────────────
     useEffect(() => {
         if (!loadingHist) scrollToBottom("instant");
     }, [loadingHist, scrollToBottom]);
 
-    // ── Scroll to bottom on new messages ────────────────────────────────────
     useEffect(() => {
         scrollToBottom("smooth");
     }, [messages.length, scrollToBottom]);
 
-    // ── WebSocket connection ─────────────────────────────────────────────────
     useEffect(() => {
         if (readonly) return; // read-only trips don't need a live socket
         isMounted.current = true;
@@ -318,7 +287,6 @@ export default function TripChatPanel({
         };
     }, [tripId, readonly, handleIncoming]);
 
-    // ── Send handler ─────────────────────────────────────────────────────────
     const canSend = (
         !readonly &&
         socketStatus === "connected" &&
@@ -343,10 +311,8 @@ export default function TripChatPanel({
             e.preventDefault();
             handleSend();
         }
-        // Shift+Enter = newline (default textarea behavior)
     }, [handleSend]);
 
-    // ── Status indicator helpers ─────────────────────────────────────────────
     const statusDot = {
         connected:    { color: "#5dba7d", label: "Live" },
         connecting:   { color: C.sand,   label: "Connecting…" },
@@ -354,15 +320,13 @@ export default function TripChatPanel({
         error:        { color: C.error,  label: "Disconnected" },
     }[socketStatus] ?? { color: C.tan, label: "—" };
 
-    // ── Group messages by sender (show avatar/name only on first of group) ───
     function buildGroups(msgs) {
         return msgs.map((msg, i) => {
             const prev = msgs[i - 1];
             const isOwn    = currentUserId != null && msg.senderUserId === currentUserId;
             const isSystem = msg.messageType === "SYSTEM_MESSAGE";
 
-            // Show avatar + name if:
-            // first message OR previous sender differs OR previous was a system msg
+
             const showAvatar = (
                 !isSystem && (
                     !prev ||
@@ -379,7 +343,6 @@ export default function TripChatPanel({
     const charCount = inputText.length;
     const charOver  = charCount > MAX_CHARS;
 
-    // ─────────────────────────────────────────────────────────────────────────
     return (
         <section style={{
             display: "flex", flexDirection: "column",
@@ -393,14 +356,12 @@ export default function TripChatPanel({
             maxHeight: "700px",
         }}>
 
-            {/* ── Panel header ──────────────────────────────────────────────── */}
             <div style={{
                 padding: "16px 20px 14px",
                 borderBottom: `1px solid ${C.tanBorder}`,
                 background: C.beigeMid,
                 flexShrink: 0,
             }}>
-                {/* Accent strip */}
                 <div style={{
                     position: "absolute", left: 0, right: 0,
                     height: "2px",
@@ -411,7 +372,6 @@ export default function TripChatPanel({
 
                 <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "12px" }}>
                     <div style={{ minWidth: 0 }}>
-                        {/* Label */}
                         <p style={{
                             fontFamily: SANS, fontWeight: 700, fontSize: "9px",
                             textTransform: "uppercase", letterSpacing: "0.18em",
@@ -419,7 +379,6 @@ export default function TripChatPanel({
                         }}>
                             Trip Room Chat
                         </p>
-                        {/* Trip title */}
                         <h3 style={{
                             fontFamily: SERIF,
                             fontSize: "clamp(1rem, 2.5vw, 1.25rem)",
@@ -429,7 +388,6 @@ export default function TripChatPanel({
                         }}>
                             {tripTitle || [destinationCity, destinationCountry].filter(Boolean).join(", ") || "Trip Chat"}
                         </h3>
-                        {/* Destination */}
                         {(destinationCity || destinationCountry) && (
                             <p style={{
                                 fontFamily: SANS, fontWeight: 500, fontSize: "11px",
@@ -441,7 +399,6 @@ export default function TripChatPanel({
                         )}
                     </div>
 
-                    {/* Right side: member count + live dot */}
                     <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "8px", flexShrink: 0 }}>
                         {/* Member badge */}
                         {memberCount != null && (
@@ -462,7 +419,6 @@ export default function TripChatPanel({
                             </div>
                         )}
 
-                        {/* Live status */}
                         {!readonly && (
                             <div style={{
                                 display: "inline-flex", alignItems: "center", gap: "5px",
@@ -516,7 +472,6 @@ export default function TripChatPanel({
                 </div>
             </div>
 
-            {/* ── Message body ──────────────────────────────────────────────── */}
             <div style={{
                 flex: 1, overflowY: "auto",
                 padding: "16px 16px 8px",
@@ -525,7 +480,6 @@ export default function TripChatPanel({
                 scrollBehavior: "smooth",
             }}>
 
-                {/* Loading history */}
                 {loadingHist && (
                     <div style={{
                         flex: 1, display: "flex", flexDirection: "column",
@@ -543,7 +497,6 @@ export default function TripChatPanel({
                     </div>
                 )}
 
-                {/* History error */}
                 {!loadingHist && histError && (
                     <div style={{
                         flex: 1, display: "flex", flexDirection: "column",
@@ -568,7 +521,6 @@ export default function TripChatPanel({
                     </div>
                 )}
 
-                {/* Empty state */}
                 {!loadingHist && !histError && messages.length === 0 && (
                     <div style={{
                         flex: 1, display: "flex", flexDirection: "column",
@@ -602,7 +554,6 @@ export default function TripChatPanel({
                     </div>
                 )}
 
-                {/* Message list */}
                 {!loadingHist && !histError && groups.map(({ msg, isOwn, showAvatar, showName }, i) => (
                     <MessageBubble
                         key={msg.id ?? `msg-${i}`}
@@ -613,11 +564,9 @@ export default function TripChatPanel({
                     />
                 ))}
 
-                {/* Scroll anchor */}
                 <div ref={bottomRef} style={{ height: "1px" }} />
             </div>
 
-            {/* ── Input area ────────────────────────────────────────────────── */}
             <div style={{
                 flexShrink: 0,
                 borderTop: `1px solid ${C.tanBorder}`,
@@ -625,7 +574,6 @@ export default function TripChatPanel({
                 padding: "12px 14px 14px",
             }}>
 
-                {/* Reconnecting notice */}
                 {!readonly && (socketStatus === "reconnecting" || socketStatus === "connecting") && (
                     <div style={{
                         display: "flex", alignItems: "center", gap: "8px",
@@ -693,7 +641,7 @@ export default function TripChatPanel({
                                         : "Message your crew… (Enter to send, Shift+Enter for newline)"
                             }
                             rows={1}
-                            maxLength={MAX_CHARS + 20}  // slight buffer; enforced via canSend
+                            maxLength={MAX_CHARS + 20}
                             style={{
                                 width: "100%", resize: "none", boxSizing: "border-box",
                                 padding: "11px 44px 11px 14px",
@@ -714,7 +662,7 @@ export default function TripChatPanel({
                                     e.currentTarget.style.borderColor = C.lavender;
                                     e.currentTarget.style.boxShadow = "0 0 0 3px rgba(175,154,201,0.18)";
                                 }
-                                // Auto-grow
+
                                 e.currentTarget.style.height = "auto";
                                 e.currentTarget.style.height = `${Math.min(e.currentTarget.scrollHeight, 120)}px`;
                             }}
@@ -723,13 +671,11 @@ export default function TripChatPanel({
                                 e.currentTarget.style.boxShadow = "none";
                             }}
                             onInput={(e) => {
-                                // Auto-grow textarea
                                 e.currentTarget.style.height = "auto";
                                 e.currentTarget.style.height = `${Math.min(e.currentTarget.scrollHeight, 120)}px`;
                             }}
                         />
 
-                        {/* Char counter — shows when approaching limit */}
                         {charCount > MAX_CHARS * 0.75 && (
                             <span style={{
                                 position: "absolute", bottom: "10px", right: "10px",
@@ -743,7 +689,6 @@ export default function TripChatPanel({
                         )}
                     </div>
 
-                    {/* Send button */}
                     <button
                         onClick={handleSend}
                         disabled={!canSend}
@@ -790,7 +735,6 @@ export default function TripChatPanel({
                     </button>
                 </div>
 
-                {/* Footer hint */}
                 {!readonly && socketStatus === "connected" && charCount === 0 && (
                     <p style={{
                         fontFamily: SANS, fontWeight: 500, fontSize: "10px",

@@ -16,7 +16,5 @@
  * @property {string} token
  */
 
-// ASSUMPTION: AuthResponseDto has a field called "token".
-// If your backend returns "accessToken" or "jwt", update TokenService and API calls accordingly.
 
 export {};

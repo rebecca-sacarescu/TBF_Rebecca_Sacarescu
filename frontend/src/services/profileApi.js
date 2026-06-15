@@ -18,7 +18,6 @@ function authHeaders() {
 }
 
 const profileApi = {
-    /** GET /profile — returns MyProfileResponseDto */
     getMyProfile: async () => {
         const res = await fetch(`${API_BASE_URL}/profile`, {
             method: "GET",
@@ -27,7 +26,6 @@ const profileApi = {
         return handleResponse(res);
     },
 
-    /** POST /profile — create profile (once) */
     createProfile: async (data) => {
         const res = await fetch(`${API_BASE_URL}/profile`, {
             method: "POST",
@@ -37,7 +35,6 @@ const profileApi = {
         return handleResponse(res);
     },
 
-    /** PUT /profile — full replace update */
     updateProfile: async (data) => {
         const res = await fetch(`${API_BASE_URL}/profile`, {
             method: "PUT",

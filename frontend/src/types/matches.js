@@ -18,7 +18,4 @@
  * @property {string}   whyYouMatched      - Human-readable explanation string from backend
  */
 
-// ASSUMPTION: all fields above come directly from MatchResponseDto on the backend.
-// superLikeInvolved is used for badge rendering and is already factored into backend sort order.
-// Do not reorder the matches list in frontend — backend handles sort.
 export {};
